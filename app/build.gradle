@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'br.com.fullcare.utiscore'
+    namespace 'br.com.accertconsult.utiscore'
     compileSdk 36
 
     defaultConfig {
-        applicationId 'br.com.fullcare.utiscore'
+        applicationId 'br.com.accertconsult.utiscore'
         minSdk 23
         targetSdk 36
         versionCode 1

@@ -1,4 +1,4 @@
-package br.com.fullcare.utiscore;
+package br.com.accertconsult.utiscore;
 
 import android.app.Activity;
 import android.content.ClipData;
