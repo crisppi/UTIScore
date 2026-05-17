@@ -9,3 +9,46 @@ local.properties
 
 captures/
 *.apk
+
+# iOS / Xcode
+# Build artifacts
+DerivedData/
+build/
+
+# Xcode workspace/user data
+*.xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+
+# Xcode project files that are user-specific
+**/*.pbxuser
+**/*.mode1v3
+**/*.mode2v3
+**/*.perspectivev3
+
+# Swift Package Manager
+.swiftpm/
+.build/
+Package.resolved
+
+# CocoaPods
+Pods/
+
+# Carthage
+Carthage/Build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# iOS artifacts
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# macOS metadata
+.DS_Store
+
