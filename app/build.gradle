@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'br.com.accertconsult.utiscore'
+    namespace 'br.com.accertconsult.UTIScore'
     compileSdk 36
 
     defaultConfig {
-        applicationId 'br.com.accertconsult.utiscore'
+        applicationId 'br.com.accertconsult.UTIScore'
         minSdk 23
         targetSdk 36
         versionCode 1

@@ -1,6 +1,7 @@
-package br.com.accertconsult.utiscore;
+package br.com.accertconsult.UTIScore;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -205,6 +206,10 @@ public class MainActivity extends Activity {
         noteCard.addView(buttons, matchWrap());
         root.addView(noteCard);
 
+        Button privacy = secondaryButton("Politica de privacidade");
+        privacy.setOnClickListener(v -> showPrivacyPolicy());
+        root.addView(privacy, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(48)));
+
         setContentView(scroll);
     }
 
@@ -400,6 +405,29 @@ public class MainActivity extends Activity {
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, noteText.getText().toString());
         startActivity(Intent.createChooser(intent, "Compartilhar justificativa"));
+    }
+
+    private void showPrivacyPolicy() {
+        new AlertDialog.Builder(this)
+                .setTitle("Politica de privacidade")
+                .setMessage(privacyPolicyText())
+                .setPositiveButton("Entendi", null)
+                .show();
+    }
+
+    private String privacyPolicyText() {
+        return "Ultima atualizacao: 18/05/2026\n\n"
+                + "O UTI Score e um aplicativo de calculadoras clinicas e geracao de justificativa assistencial. O app nao exige cadastro, nao solicita login e nao coleta dados pessoais em servidores.\n\n"
+                + "Dados inseridos no app\n"
+                + "As informacoes digitadas ou selecionadas pelo usuario, incluindo contexto clinico, criterios assistenciais e resultados dos escores, sao usadas apenas para calcular e montar a justificativa exibida na tela. Esses dados permanecem no proprio aparelho durante o uso e nao sao enviados automaticamente para a Accert Consult ou para terceiros.\n\n"
+                + "Compartilhamento pelo usuario\n"
+                + "Quando o usuario toca em Copiar, o texto e colocado na area de transferencia do dispositivo. Quando toca em Compartilhar, o Android abre os aplicativos disponiveis no aparelho para que o usuario escolha para onde enviar o texto. Nesses casos, o tratamento dos dados passa a depender do aplicativo escolhido pelo usuario.\n\n"
+                + "Permissoes, analytics e publicidade\n"
+                + "O app nao solicita permissao de internet, localizacao, camera, microfone, contatos ou arquivos. Tambem nao utiliza publicidade, rastreadores, analytics, Firebase ou ferramentas de monitoramento de comportamento.\n\n"
+                + "Uso clinico\n"
+                + "Os escores apresentados sao ferramentas de apoio e nao substituem avaliacao medica, protocolos institucionais ou diretrizes aplicaveis. O usuario e responsavel por validar as informacoes antes de usar ou compartilhar a justificativa.\n\n"
+                + "Contato\n"
+                + "Em caso de duvidas sobre privacidade, entre em contato com a Accert Consult.";
     }
 
     private void buildSpecs() {

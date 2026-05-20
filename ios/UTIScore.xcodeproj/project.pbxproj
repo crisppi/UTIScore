@@ -148,7 +148,7 @@
 				INFOPLIST_FILE = UTIScore/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = br.com.accertconsult.utiscore;
+				PRODUCT_BUNDLE_IDENTIFIER = br.com.accertconsult.UTIScore;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -169,7 +169,7 @@
 				INFOPLIST_FILE = UTIScore/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = br.com.accertconsult.utiscore;
+				PRODUCT_BUNDLE_IDENTIFIER = br.com.accertconsult.UTIScore;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -188,7 +188,7 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = UTIScore/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				PRODUCT_BUNDLE_IDENTIFIER = br.com.accertconsult.utiscore;
+				PRODUCT_BUNDLE_IDENTIFIER = br.com.accertconsult.UTIScore;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
@@ -204,7 +204,7 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = UTIScore/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				PRODUCT_BUNDLE_IDENTIFIER = br.com.accertconsult.utiscore;
+				PRODUCT_BUNDLE_IDENTIFIER = br.com.accertconsult.UTIScore;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
