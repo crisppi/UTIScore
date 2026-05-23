@@ -61,7 +61,7 @@ struct ContentView: View {
             bg.ignoresSafeArea()
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 10) {
                     header
                     scorePicker
                     calculatorCard
@@ -69,9 +69,9 @@ struct ContentView: View {
                     noteCard
                     privacyButton
                 }
-                .padding(.horizontal, 18)
-                .padding(.top, 12)
-                .padding(.bottom, 24)
+                .padding(.horizontal, 16)
+                .padding(.top, 10)
+                .padding(.bottom, 22)
             }
         }
         .dynamicTypeSize(.medium)
@@ -84,18 +84,18 @@ struct ContentView: View {
     }
 
     private var header: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 9) {
             Image(uiImage: UIImage(named: "logo_accert") ?? UIImage())
                 .resizable()
                 .scaledToFit()
-                .frame(width: 74, height: 34)
+                .frame(width: 64, height: 30)
 
             VStack(alignment: .leading, spacing: 1) {
                 Text("UTI Score")
-                    .font(.system(size: 22, weight: .bold))
+                    .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(text)
                 Text("Calculadoras e justificativa.")
-                    .font(.system(size: 12))
+                    .font(.system(size: 11))
                     .foregroundStyle(muted)
             }
             Spacer(minLength: 0)
@@ -114,15 +114,15 @@ struct ContentView: View {
             } label: {
                 HStack(spacing: 8) {
                     Text("Escore: \(selectedScore.shortName)")
-                        .font(.system(size: 15, weight: .bold))
+                        .font(.system(size: 14, weight: .bold))
                     Image(systemName: menuExpanded ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 13, weight: .bold))
+                        .font(.system(size: 12, weight: .bold))
                     Spacer(minLength: 0)
                 }
                 .foregroundStyle(darkTeal)
-                .padding(.horizontal, 14)
+                .padding(.horizontal, 12)
                 .frame(maxWidth: .infinity)
-                .frame(height: 44)
+                .frame(height: 40)
                 .background(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
@@ -139,11 +139,11 @@ struct ContentView: View {
                             }
                         } label: {
                             Text(score.shortName)
-                                .font(.system(size: 13, weight: .bold))
+                                .font(.system(size: 12, weight: .bold))
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.78)
                                 .frame(maxWidth: .infinity)
-                                .frame(height: 38)
+                                .frame(height: 34)
                                 .foregroundStyle(score.id == selectedScoreID ? .white : darkTeal)
                                 .background(score.id == selectedScoreID ? teal : .white)
                                 .clipShape(RoundedRectangle(cornerRadius: 19))
@@ -157,19 +157,19 @@ struct ContentView: View {
     }
 
     private var calculatorCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             Text(selectedScore.title)
-                .font(.system(size: 21, weight: .bold))
+                .font(.system(size: 19, weight: .bold))
                 .foregroundStyle(text)
             Text(selectedScore.helper)
-                .font(.system(size: 13))
+                .font(.system(size: 12))
                 .foregroundStyle(muted)
                 .padding(.bottom, 2)
 
             ForEach(selectedScore.fields) { field in
                 VStack(alignment: .leading, spacing: 6) {
                     Text(field.label)
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(text)
 
                     Menu {
@@ -181,18 +181,18 @@ struct ContentView: View {
                     } label: {
                         HStack {
                             Text(optionLabel(for: field))
-                                .font(.system(size: 15))
+                                .font(.system(size: 14))
                                 .foregroundStyle(text)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.78)
                             Spacer()
                             Image(systemName: "chevron.up.chevron.down")
-                                .font(.system(size: 12, weight: .semibold))
+                                .font(.system(size: 11, weight: .semibold))
                                 .foregroundStyle(muted)
                         }
-                        .padding(.horizontal, 12)
+                        .padding(.horizontal, 11)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 46)
+                        .frame(height: 40)
                         .background(Color(red: 248 / 255, green: 250 / 255, blue: 252 / 255))
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
@@ -204,14 +204,14 @@ struct ContentView: View {
             Button("Calcular escore") {
                 calculate()
             }
-            .font(.system(size: 16, weight: .bold))
+            .font(.system(size: 15, weight: .bold))
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
-            .frame(height: 48)
+            .frame(height: 44)
             .background(teal)
             .clipShape(RoundedRectangle(cornerRadius: 8))
         }
-        .padding(14)
+        .padding(12)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
@@ -220,25 +220,25 @@ struct ContentView: View {
     private var resultCard: some View {
         VStack(alignment: .leading, spacing: 7) {
             Text("Resultado")
-                .font(.system(size: 13, weight: .bold))
+                .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(muted)
             if let result = currentResult {
                 Text(result.scoreText)
-                    .font(.system(size: 28, weight: .bold))
+                    .font(.system(size: 24, weight: .bold))
                     .foregroundStyle(text)
                 Text(result.classification)
-                    .font(.system(size: 15, weight: .bold))
+                    .font(.system(size: 14, weight: .bold))
                     .foregroundStyle(darkTeal)
                 Text(result.risk)
-                    .font(.system(size: 13))
+                    .font(.system(size: 12))
                     .foregroundStyle(muted)
             } else {
                 Text("Preencha e calcule")
-                    .font(.system(size: 24, weight: .bold))
+                    .font(.system(size: 18, weight: .bold))
                     .foregroundStyle(text)
             }
         }
-        .padding(14)
+        .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -246,17 +246,18 @@ struct ContentView: View {
     }
 
     private var noteCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             Text("Justificativa automatica")
-                .font(.system(size: 21, weight: .bold))
+                .font(.system(size: 19, weight: .bold))
                 .foregroundStyle(text)
             Text("Use um contexto curto e marque criterios assistenciais. O texto se atualiza com os escores ja calculados.")
-                .font(.system(size: 13))
+                .font(.system(size: 12))
                 .foregroundStyle(muted)
 
             TextField("Ex.: insuficiencia respiratoria aguda, pneumonia grave", text: $patientContext, axis: .vertical)
+                .font(.system(size: 13))
                 .lineLimit(2...4)
-                .padding(12)
+                .padding(11)
                 .background(Color(red: 248 / 255, green: 250 / 255, blue: 252 / 255))
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
@@ -268,13 +269,13 @@ struct ContentView: View {
                         if isOn { criteria.insert(item) } else { criteria.remove(item) }
                     }
                 ))
-                .font(.system(size: 14))
+                .font(.system(size: 13))
             }
 
             Text(noteText)
-                .font(.system(size: 14))
+                .font(.system(size: 13))
                 .foregroundStyle(text)
-                .padding(12)
+                .padding(11)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color(red: 248 / 255, green: 250 / 255, blue: 252 / 255))
                 .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -286,9 +287,9 @@ struct ContentView: View {
                     copiedVisible = true
                 } label: {
                     Text("Copiar")
-                        .font(.system(size: 15, weight: .bold))
+                        .font(.system(size: 14, weight: .bold))
                         .frame(maxWidth: .infinity)
-                        .frame(height: 46)
+                        .frame(height: 42)
                 }
                 .foregroundStyle(darkTeal)
                 .background(.white)
@@ -297,9 +298,9 @@ struct ContentView: View {
 
                 ShareLink(item: noteText) {
                     Text("Compartilhar")
-                        .font(.system(size: 15, weight: .bold))
+                        .font(.system(size: 14, weight: .bold))
                         .frame(maxWidth: .infinity)
-                        .frame(height: 46)
+                        .frame(height: 42)
                 }
                 .foregroundStyle(darkTeal)
                 .background(.white)
@@ -307,7 +308,7 @@ struct ContentView: View {
                 .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
             }
         }
-        .padding(14)
+        .padding(12)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
@@ -318,9 +319,9 @@ struct ContentView: View {
             privacyVisible = true
         } label: {
             Text("Politica de privacidade")
-                .font(.system(size: 15, weight: .bold))
+                .font(.system(size: 14, weight: .bold))
                 .frame(maxWidth: .infinity)
-                .frame(height: 48)
+                .frame(height: 44)
                 .foregroundStyle(darkTeal)
                 .background(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -362,9 +363,9 @@ struct PrivacyPolicyView: View {
         NavigationStack {
             ScrollView {
                 Text(Self.policyText)
-                    .font(.system(size: 15))
+                    .font(.system(size: 14))
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(18)
+                    .padding(16)
             }
             .navigationTitle("Politica de privacidade")
             .toolbar {

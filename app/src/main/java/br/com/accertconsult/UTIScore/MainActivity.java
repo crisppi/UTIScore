@@ -42,6 +42,8 @@ public class MainActivity extends Activity {
     private static final int BRAND = Color.rgb(15, 118, 110);
     private static final int BRAND_DARK = Color.rgb(17, 94, 89);
     private static final int WARNING = Color.rgb(180, 83, 9);
+    private static final int EMPTY_RESULT_TEXT_SP = 22;
+    private static final int RESULT_TEXT_SP = 26;
 
     private final List<ScoreSpec> specs = new ArrayList<>();
     private final Map<String, FieldView> currentFields = new LinkedHashMap<>();
@@ -140,7 +142,7 @@ public class MainActivity extends Activity {
 
         LinearLayout resultCard = card();
         TextView resultLabel = text("Resultado", 13, MUTED, Typeface.BOLD);
-        resultScore = text("Preencha e calcule", 30, TEXT, Typeface.BOLD);
+        resultScore = text("Preencha e calcule", EMPTY_RESULT_TEXT_SP, TEXT, Typeface.BOLD);
         resultClass = text("", 16, BRAND_DARK, Typeface.BOLD);
         resultRisk = text("", 13, MUTED, Typeface.NORMAL);
         resultRisk.setPadding(0, dp(5), 0, 0);
@@ -282,6 +284,7 @@ public class MainActivity extends Activity {
         ScoreResult previous = savedResults.get(spec.id);
         if (previous == null) {
             resultScore.setText("Preencha e calcule");
+            resultScore.setTextSize(EMPTY_RESULT_TEXT_SP);
             resultClass.setText("");
             resultRisk.setText("");
         } else {
@@ -342,6 +345,7 @@ public class MainActivity extends Activity {
 
     private void showResult(ScoreResult result) {
         resultScore.setText(result.scoreText);
+        resultScore.setTextSize(RESULT_TEXT_SP);
         resultClass.setText(result.classification);
         resultRisk.setText(result.risk);
     }
