@@ -42,11 +42,12 @@ struct ContentView: View {
     @State private var privacyVisible = false
     @State private var copiedVisible = false
 
-    private let teal = Color(red: 15 / 255, green: 118 / 255, blue: 110 / 255)
-    private let darkTeal = Color(red: 17 / 255, green: 94 / 255, blue: 89 / 255)
-    private let bg = Color(red: 247 / 255, green: 250 / 255, blue: 252 / 255)
+    private let accent = Color(red: 37 / 255, green: 99 / 255, blue: 235 / 255)
+    private let accentDark = Color(red: 30 / 255, green: 64 / 255, blue: 175 / 255)
+    private let bg = Color(red: 248 / 255, green: 250 / 255, blue: 252 / 255)
     private let text = Color(red: 15 / 255, green: 23 / 255, blue: 42 / 255)
     private let muted = Color(red: 71 / 255, green: 85 / 255, blue: 105 / 255)
+    private let fieldBg = Color(red: 250 / 255, green: 252 / 255, blue: 255 / 255)
 
     private var selectedScore: ScoreDefinition {
         scores.first { $0.id == selectedScoreID } ?? scores[0]
@@ -114,15 +115,15 @@ struct ContentView: View {
             } label: {
                 HStack(spacing: 8) {
                     Text("Escore: \(selectedScore.shortName)")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: 13, weight: .semibold))
                     Image(systemName: menuExpanded ? "chevron.up" : "chevron.down")
                         .font(.system(size: 12, weight: .bold))
                     Spacer(minLength: 0)
                 }
-                .foregroundStyle(darkTeal)
+                .foregroundStyle(accentDark)
                 .padding(.horizontal, 12)
                 .frame(maxWidth: .infinity)
-                .frame(height: 40)
+                .frame(height: 38)
                 .background(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
@@ -139,13 +140,13 @@ struct ContentView: View {
                             }
                         } label: {
                             Text(score.shortName)
-                                .font(.system(size: 12, weight: .bold))
+                                .font(.system(size: 11, weight: .medium))
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.78)
                                 .frame(maxWidth: .infinity)
-                                .frame(height: 34)
-                                .foregroundStyle(score.id == selectedScoreID ? .white : darkTeal)
-                                .background(score.id == selectedScoreID ? teal : .white)
+                                .frame(height: 32)
+                                .foregroundStyle(score.id == selectedScoreID ? .white : accentDark)
+                                .background(score.id == selectedScoreID ? accent : .white)
                                 .clipShape(RoundedRectangle(cornerRadius: 19))
                                 .overlay(RoundedRectangle(cornerRadius: 19).stroke(Color(.systemGray5), lineWidth: 1))
                         }
@@ -157,20 +158,20 @@ struct ContentView: View {
     }
 
     private var calculatorCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 9) {
             Text(selectedScore.title)
-                .font(.system(size: 19, weight: .bold))
+                .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(text)
             Text(selectedScore.helper)
-                .font(.system(size: 12))
+                .font(.system(size: 11))
                 .foregroundStyle(muted)
                 .padding(.bottom, 2)
 
             ForEach(selectedScore.fields) { field in
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 5) {
                     Text(field.label)
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundStyle(text)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(text.opacity(0.92))
 
                     Menu {
                         ForEach(Array(field.options.enumerated()), id: \.offset) { index, option in
@@ -181,7 +182,7 @@ struct ContentView: View {
                     } label: {
                         HStack {
                             Text(optionLabel(for: field))
-                                .font(.system(size: 14))
+                                .font(.system(size: 13))
                                 .foregroundStyle(text)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.78)
@@ -192,8 +193,8 @@ struct ContentView: View {
                         }
                         .padding(.horizontal, 11)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 40)
-                        .background(Color(red: 248 / 255, green: 250 / 255, blue: 252 / 255))
+                        .frame(height: 38)
+                        .background(fieldBg)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
                     }
@@ -204,14 +205,14 @@ struct ContentView: View {
             Button("Calcular escore") {
                 calculate()
             }
-            .font(.system(size: 15, weight: .bold))
+            .font(.system(size: 14, weight: .medium))
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
-            .frame(height: 44)
-            .background(teal)
+            .frame(height: 42)
+            .background(accent)
             .clipShape(RoundedRectangle(cornerRadius: 8))
         }
-        .padding(12)
+        .padding(11)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
@@ -220,25 +221,25 @@ struct ContentView: View {
     private var resultCard: some View {
         VStack(alignment: .leading, spacing: 7) {
             Text("Resultado")
-                .font(.system(size: 12, weight: .bold))
+                .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(muted)
             if let result = currentResult {
                 Text(result.scoreText)
-                    .font(.system(size: 24, weight: .bold))
+                    .font(.system(size: 22, weight: .semibold))
                     .foregroundStyle(text)
                 Text(result.classification)
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(darkTeal)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(accentDark)
                 Text(result.risk)
                     .font(.system(size: 12))
                     .foregroundStyle(muted)
             } else {
                 Text("Preencha e calcule")
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(text)
             }
         }
-        .padding(12)
+        .padding(11)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -246,19 +247,19 @@ struct ContentView: View {
     }
 
     private var noteCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 9) {
             Text("Justificativa automatica")
-                .font(.system(size: 19, weight: .bold))
+                .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(text)
             Text("Use um contexto curto e marque criterios assistenciais. O texto se atualiza com os escores ja calculados.")
-                .font(.system(size: 12))
+                .font(.system(size: 11))
                 .foregroundStyle(muted)
 
             TextField("Ex.: insuficiencia respiratoria aguda, pneumonia grave", text: $patientContext, axis: .vertical)
-                .font(.system(size: 13))
+                .font(.system(size: 12))
                 .lineLimit(2...4)
-                .padding(11)
-                .background(Color(red: 248 / 255, green: 250 / 255, blue: 252 / 255))
+                .padding(10)
+                .background(fieldBg)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
 
@@ -269,15 +270,15 @@ struct ContentView: View {
                         if isOn { criteria.insert(item) } else { criteria.remove(item) }
                     }
                 ))
-                .font(.system(size: 13))
+                .font(.system(size: 12))
             }
 
             Text(noteText)
-                .font(.system(size: 13))
+                .font(.system(size: 12))
                 .foregroundStyle(text)
-                .padding(11)
+                .padding(10)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(red: 248 / 255, green: 250 / 255, blue: 252 / 255))
+                .background(fieldBg)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
 
@@ -287,28 +288,28 @@ struct ContentView: View {
                     copiedVisible = true
                 } label: {
                     Text("Copiar")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: 13, weight: .medium))
                         .frame(maxWidth: .infinity)
-                        .frame(height: 42)
+                        .frame(height: 40)
                 }
-                .foregroundStyle(darkTeal)
+                .foregroundStyle(accentDark)
                 .background(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
 
                 ShareLink(item: noteText) {
                     Text("Compartilhar")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: 13, weight: .medium))
                         .frame(maxWidth: .infinity)
-                        .frame(height: 42)
+                        .frame(height: 40)
                 }
-                .foregroundStyle(darkTeal)
+                .foregroundStyle(accentDark)
                 .background(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
             }
         }
-        .padding(12)
+        .padding(11)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
@@ -319,10 +320,10 @@ struct ContentView: View {
             privacyVisible = true
         } label: {
             Text("Politica de privacidade")
-                .font(.system(size: 14, weight: .bold))
+                .font(.system(size: 13, weight: .medium))
                 .frame(maxWidth: .infinity)
-                .frame(height: 44)
-                .foregroundStyle(darkTeal)
+                .frame(height: 42)
+                .foregroundStyle(accentDark)
                 .background(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
