@@ -2,6 +2,9 @@
 build/
 app/build/
 local.properties
+key.properties
+*.jks
+*.keystore
 
 *.iml
 .idea/
@@ -51,4 +54,3 @@ fastlane/test_output
 
 # macOS metadata
 .DS_Store
-

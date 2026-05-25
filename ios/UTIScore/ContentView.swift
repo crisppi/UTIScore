@@ -37,7 +37,7 @@ struct ContentView: View {
     @State private var menuExpanded = false
     @State private var selections: [String: Int] = [:]
     @State private var savedResults: [String: ScoreResult] = [:]
-    @State private var patientContext = ""
+    @State private var beneficiaryContext = ""
     @State private var criteria: Set<String> = []
     @State private var privacyVisible = false
     @State private var copiedVisible = false
@@ -254,7 +254,7 @@ struct ContentView: View {
                 .font(.system(size: 13))
                 .foregroundStyle(muted)
 
-            TextField("Ex.: insuficiencia respiratoria aguda, pneumonia grave", text: $patientContext, axis: .vertical)
+            TextField("Ex.: insuficiencia respiratoria aguda, pneumonia grave", text: $beneficiaryContext, axis: .vertical)
                 .lineLimit(2...4)
                 .padding(12)
                 .background(Color(red: 248 / 255, green: 250 / 255, blue: 252 / 255))
@@ -330,8 +330,8 @@ struct ContentView: View {
     }
 
     private var noteText: String {
-        let context = patientContext.trimmingCharacters(in: .whitespacesAndNewlines)
-        var text = "Paciente "
+        let context = beneficiaryContext.trimmingCharacters(in: .whitespacesAndNewlines)
+        var text = "Beneficiário "
         text += context.isEmpty ? "em avaliacao para suporte intensivo" : "com \(context)"
         if !savedResults.isEmpty {
             let summaries = scores.compactMap { savedResults[$0.id]?.summary }
@@ -544,7 +544,7 @@ enum ScoreLibrary {
 
     private static func hasBled() -> ScoreDefinition {
         let fields = yesNoFields([("htn", "Hipertensao nao controlada"), ("renal", "Funcao renal alterada"), ("liver", "Funcao hepatica alterada"), ("stroke", "AVC previo"), ("bleeding", "Sangramento previo ou predisposicao"), ("inr", "INR labil"), ("elderly", "Idade > 65 anos"), ("drugs", "Drogas que aumentam sangramento"), ("alcohol", "Alcool")])
-        return ScoreDefinition(id: "hasbled", shortName: "HAS-BLED", title: "HAS-BLED", helper: "Risco de sangramento em pacientes anticoagulados.", fields: fields) { selections in
+        return ScoreDefinition(id: "hasbled", shortName: "HAS-BLED", title: "HAS-BLED", helper: "Risco de sangramento em beneficiários anticoagulados.", fields: fields) { selections in
             let score = sum(fields, selections)
             let cls = score >= 3 ? "Alto risco de sangramento" : "Risco nao alto"
             let risk = score >= 3 ? "Exige correcao de fatores modificaveis e seguimento mais proximo; nao e contraindicacao automatica a anticoagulacao." : "Manter avaliacao de fatores modificaveis."

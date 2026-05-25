@@ -56,7 +56,7 @@ public class MainActivity extends Activity {
     private TextView resultScore;
     private TextView resultClass;
     private TextView resultRisk;
-    private EditText patientContext;
+    private EditText beneficiaryContext;
     private TextView noteText;
     private ScoreSpec currentSpec;
     private boolean scoreMenuExpanded = false;
@@ -154,17 +154,17 @@ public class MainActivity extends Activity {
         TextView noteTitle = text("Justificativa automatica", 21, TEXT, Typeface.BOLD);
         TextView noteHelp = text("Use um contexto curto e marque criterios assistenciais. O texto se atualiza com os escores ja calculados.", 13, MUTED, Typeface.NORMAL);
         noteHelp.setPadding(0, dp(4), 0, dp(12));
-        patientContext = new EditText(this);
-        patientContext.setHint("Ex.: insuficiencia respiratoria aguda, pneumonia grave, choque septico");
-        patientContext.setSingleLine(false);
-        patientContext.setMinLines(2);
-        patientContext.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-        patientContext.setTextColor(TEXT);
-        patientContext.setHintTextColor(Color.rgb(148, 163, 184));
-        patientContext.setTextSize(15);
-        patientContext.setBackground(cardBg(Color.rgb(248, 250, 252), LINE, dp(8)));
-        patientContext.setPadding(dp(12), dp(10), dp(12), dp(10));
-        patientContext.setOnFocusChangeListener((v, hasFocus) -> updateNote());
+        beneficiaryContext = new EditText(this);
+        beneficiaryContext.setHint("Ex.: insuficiencia respiratoria aguda, pneumonia grave, choque septico");
+        beneficiaryContext.setSingleLine(false);
+        beneficiaryContext.setMinLines(2);
+        beneficiaryContext.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        beneficiaryContext.setTextColor(TEXT);
+        beneficiaryContext.setHintTextColor(Color.rgb(148, 163, 184));
+        beneficiaryContext.setTextSize(15);
+        beneficiaryContext.setBackground(cardBg(Color.rgb(248, 250, 252), LINE, dp(8)));
+        beneficiaryContext.setPadding(dp(12), dp(10), dp(12), dp(10));
+        beneficiaryContext.setOnFocusChangeListener((v, hasFocus) -> updateNote());
 
         LinearLayout criteria = column();
         criteria.setPadding(0, dp(12), 0, dp(4));
@@ -200,7 +200,7 @@ public class MainActivity extends Activity {
 
         noteCard.addView(noteTitle);
         noteCard.addView(noteHelp);
-        noteCard.addView(patientContext, matchWrap());
+        noteCard.addView(beneficiaryContext, matchWrap());
         noteCard.addView(criteria);
         noteCard.addView(noteText, matchWrap());
         noteCard.addView(buttons, matchWrap());
@@ -348,9 +348,9 @@ public class MainActivity extends Activity {
 
     private void updateNote() {
         if (noteText == null) return;
-        String context = patientContext == null ? "" : patientContext.getText().toString().trim();
+        String context = beneficiaryContext == null ? "" : beneficiaryContext.getText().toString().trim();
         StringBuilder text = new StringBuilder();
-        text.append("Paciente ");
+        text.append("Beneficiário ");
         if (context.length() > 0) {
             text.append("com ").append(context);
         } else {
@@ -628,7 +628,7 @@ public class MainActivity extends Activity {
     }
 
     private ScoreSpec hasBled() {
-        ScoreSpec s = new ScoreSpec("hasbled", "HAS-BLED", "HAS-BLED", "Risco de sangramento em pacientes anticoagulados.");
+        ScoreSpec s = new ScoreSpec("hasbled", "HAS-BLED", "HAS-BLED", "Risco de sangramento em beneficiários anticoagulados.");
         s.check("htn", "Hipertensao nao controlada", 1);
         s.check("renal", "Funcao renal alterada", 1);
         s.check("liver", "Funcao hepatica alterada", 1);
