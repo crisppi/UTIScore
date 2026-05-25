@@ -34,14 +34,17 @@ import java.util.Locale;
 import java.util.Map;
 
 public class MainActivity extends Activity {
-    private static final int BG = Color.rgb(247, 250, 252);
+    private static final int BG = Color.rgb(248, 250, 252);
     private static final int SURFACE = Color.WHITE;
+    private static final int FIELD_BG = Color.rgb(250, 252, 255);
     private static final int TEXT = Color.rgb(15, 23, 42);
     private static final int MUTED = Color.rgb(71, 85, 105);
-    private static final int LINE = Color.rgb(226, 232, 240);
-    private static final int BRAND = Color.rgb(15, 118, 110);
-    private static final int BRAND_DARK = Color.rgb(17, 94, 89);
+    private static final int LINE = Color.rgb(229, 234, 242);
+    private static final int ACCENT = Color.rgb(37, 99, 235);
+    private static final int ACCENT_DARK = Color.rgb(30, 64, 175);
     private static final int WARNING = Color.rgb(180, 83, 9);
+    private static final int EMPTY_RESULT_TEXT_SP = 20;
+    private static final int RESULT_TEXT_SP = 24;
 
     private final List<ScoreSpec> specs = new ArrayList<>();
     private final Map<String, FieldView> currentFields = new LinkedHashMap<>();
@@ -76,13 +79,13 @@ public class MainActivity extends Activity {
     private void buildScreen() {
         ScrollView scroll = new ScrollView(this);
         scroll.setFillViewport(true);
-        scroll.setBackgroundColor(BRAND_DARK);
+        scroll.setBackgroundColor(BG);
         scroll.setPadding(0, statusBarHeight(), 0, 0);
         scroll.setClipToPadding(true);
 
         LinearLayout root = column();
         root.setBackgroundColor(BG);
-        root.setPadding(dp(18), dp(18), dp(18), dp(26));
+        root.setPadding(dp(16), dp(16), dp(16), dp(24));
         scroll.addView(root);
 
         LinearLayout header = new LinearLayout(this);
@@ -94,8 +97,8 @@ public class MainActivity extends Activity {
         logo.setImageResource(R.drawable.logo_accert);
         logo.setAdjustViewBounds(true);
         logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        LinearLayout.LayoutParams logoLp = new LinearLayout.LayoutParams(dp(96), dp(44));
-        logoLp.setMargins(0, 0, dp(10), 0);
+        LinearLayout.LayoutParams logoLp = new LinearLayout.LayoutParams(dp(88), dp(40));
+        logoLp.setMargins(0, 0, dp(9), 0);
         header.addView(logo, logoLp);
 
         LinearLayout titleBlock = column();
@@ -110,7 +113,8 @@ public class MainActivity extends Activity {
         root.addView(header, matchWrap());
 
         menuButton = secondaryButton("Escore: SOFA");
-        menuButton.setGravity(Gravity.CENTER);
+        menuButton.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
+        menuButton.setPadding(dp(14), 0, dp(14), 0);
         menuButton.setOnClickListener(v -> toggleScoreMenu());
         LinearLayout.LayoutParams menuLp = matchWrap();
         menuLp.setMargins(0, dp(14), 0, dp(8));
@@ -123,8 +127,8 @@ public class MainActivity extends Activity {
         root.addView(tabHost, matchWrap());
 
         LinearLayout calcCard = card();
-        scoreTitle = text("", 21, TEXT, Typeface.BOLD);
-        scoreHelper = text("", 13, MUTED, Typeface.NORMAL);
+        scoreTitle = mediumText("", 20, TEXT);
+        scoreHelper = text("", 12, MUTED, Typeface.NORMAL);
         scoreHelper.setPadding(0, dp(4), 0, dp(12));
         formHost = column();
         calcCard.addView(scoreTitle);
@@ -139,10 +143,10 @@ public class MainActivity extends Activity {
         root.addView(calcCard);
 
         LinearLayout resultCard = card();
-        TextView resultLabel = text("Resultado", 13, MUTED, Typeface.BOLD);
-        resultScore = text("Preencha e calcule", 30, TEXT, Typeface.BOLD);
-        resultClass = text("", 16, BRAND_DARK, Typeface.BOLD);
-        resultRisk = text("", 13, MUTED, Typeface.NORMAL);
+        TextView resultLabel = mediumText("Resultado", 12, MUTED);
+        resultScore = mediumText("Preencha e calcule", EMPTY_RESULT_TEXT_SP, TEXT);
+        resultClass = mediumText("", 14, ACCENT_DARK);
+        resultRisk = text("", 12, MUTED, Typeface.NORMAL);
         resultRisk.setPadding(0, dp(5), 0, 0);
         resultCard.addView(resultLabel);
         resultCard.addView(resultScore);
@@ -151,20 +155,20 @@ public class MainActivity extends Activity {
         root.addView(resultCard);
 
         LinearLayout noteCard = card();
-        TextView noteTitle = text("Justificativa automatica", 21, TEXT, Typeface.BOLD);
-        TextView noteHelp = text("Use um contexto curto e marque criterios assistenciais. O texto se atualiza com os escores ja calculados.", 13, MUTED, Typeface.NORMAL);
+        TextView noteTitle = mediumText("Justificativa automatica", 20, TEXT);
+        TextView noteHelp = text("Use um contexto curto e marque criterios assistenciais. O texto se atualiza com os escores ja calculados.", 12, MUTED, Typeface.NORMAL);
         noteHelp.setPadding(0, dp(4), 0, dp(12));
-        beneficiaryContext = new EditText(this);
-        beneficiaryContext.setHint("Ex.: insuficiencia respiratoria aguda, pneumonia grave, choque septico");
-        beneficiaryContext.setSingleLine(false);
-        beneficiaryContext.setMinLines(2);
-        beneficiaryContext.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-        beneficiaryContext.setTextColor(TEXT);
-        beneficiaryContext.setHintTextColor(Color.rgb(148, 163, 184));
-        beneficiaryContext.setTextSize(15);
-        beneficiaryContext.setBackground(cardBg(Color.rgb(248, 250, 252), LINE, dp(8)));
-        beneficiaryContext.setPadding(dp(12), dp(10), dp(12), dp(10));
-        beneficiaryContext.setOnFocusChangeListener((v, hasFocus) -> updateNote());
+        patientContext = new EditText(this);
+        patientContext.setHint("Ex.: insuficiencia respiratoria aguda, pneumonia grave, choque septico");
+        patientContext.setSingleLine(false);
+        patientContext.setMinLines(2);
+        patientContext.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        patientContext.setTextColor(TEXT);
+        patientContext.setHintTextColor(Color.rgb(148, 163, 184));
+        patientContext.setTextSize(15);
+        patientContext.setBackground(cardBg(Color.rgb(248, 250, 252), LINE, dp(8)));
+        patientContext.setPadding(dp(12), dp(10), dp(12), dp(10));
+        patientContext.setOnFocusChangeListener((v, hasFocus) -> updateNote());
 
         LinearLayout criteria = column();
         criteria.setPadding(0, dp(12), 0, dp(4));
@@ -179,7 +183,7 @@ public class MainActivity extends Activity {
 
         noteText = text("", 15, TEXT, Typeface.NORMAL);
         noteText.setLineSpacing(dp(2), 1.0f);
-        noteText.setBackground(cardBg(Color.rgb(248, 250, 252), LINE, dp(8)));
+        noteText.setBackground(cardBg(FIELD_BG, LINE, dp(8)));
         noteText.setPadding(dp(12), dp(12), dp(12), dp(12));
 
         LinearLayout buttons = new LinearLayout(this);
@@ -234,9 +238,9 @@ public class MainActivity extends Activity {
             b.setText(spec.shortName);
             b.setAllCaps(false);
             b.setTextSize(12);
-            b.setTextColor(spec == currentSpec ? Color.WHITE : BRAND_DARK);
+            b.setTextColor(spec == currentSpec ? Color.WHITE : ACCENT_DARK);
             b.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-            b.setBackground(cardBg(spec == currentSpec ? BRAND : Color.WHITE, spec == currentSpec ? BRAND : LINE, dp(22)));
+            b.setBackground(cardBg(spec == currentSpec ? ACCENT : Color.WHITE, spec == currentSpec ? ACCENT : LINE, dp(18)));
             b.setMinHeight(0);
             b.setMinWidth(0);
             b.setSingleLine(true);
@@ -248,7 +252,7 @@ public class MainActivity extends Activity {
             });
             GridLayout.LayoutParams lp = new GridLayout.LayoutParams();
             lp.width = 0;
-            lp.height = dp(42);
+            lp.height = dp(38);
             lp.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
             lp.setMargins(0, 0, dp(8), dp(8));
             tabHost.addView(b, lp);
@@ -282,6 +286,8 @@ public class MainActivity extends Activity {
         ScoreResult previous = savedResults.get(spec.id);
         if (previous == null) {
             resultScore.setText("Preencha e calcule");
+            resultScore.setTextSize(EMPTY_RESULT_TEXT_SP);
+            resultScore.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
             resultClass.setText("");
             resultRisk.setText("");
         } else {
@@ -290,13 +296,13 @@ public class MainActivity extends Activity {
     }
 
     private void addOptionField(FieldSpec field) {
-        TextView label = text(field.label, 14, TEXT, Typeface.BOLD);
+        TextView label = mediumText(field.label, 13, TEXT);
         label.setPadding(0, dp(8), 0, dp(5));
         Spinner spinner = new Spinner(this);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, field.options);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        spinner.setBackground(cardBg(Color.rgb(248, 250, 252), LINE, dp(8)));
+        spinner.setBackground(cardBg(FIELD_BG, LINE, dp(8)));
         spinner.setPadding(dp(8), 0, dp(8), 0);
         FieldView fieldView = new FieldView(field, spinner, null);
         currentFields.put(field.id, fieldView);
@@ -342,6 +348,8 @@ public class MainActivity extends Activity {
 
     private void showResult(ScoreResult result) {
         resultScore.setText(result.scoreText);
+        resultScore.setTextSize(RESULT_TEXT_SP);
+        resultScore.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         resultClass.setText(result.classification);
         resultRisk.setText(result.risk);
     }
@@ -445,11 +453,14 @@ public class MainActivity extends Activity {
 
     private void configureSystemBars() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().setStatusBarColor(BRAND_DARK);
+            getWindow().setStatusBarColor(BG);
             getWindow().setNavigationBarColor(SURFACE);
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         }
     }
 
@@ -736,8 +747,8 @@ public class MainActivity extends Activity {
 
     private LinearLayout card() {
         LinearLayout layout = column();
-        layout.setBackground(cardBg(SURFACE, LINE, dp(10)));
-        layout.setPadding(dp(16), dp(16), dp(16), dp(16));
+        layout.setBackground(cardBg(SURFACE, LINE, dp(8)));
+        layout.setPadding(dp(14), dp(14), dp(14), dp(14));
         LinearLayout.LayoutParams lp = matchWrap();
         lp.setMargins(0, 0, 0, dp(14));
         layout.setLayoutParams(lp);
@@ -756,7 +767,13 @@ public class MainActivity extends Activity {
         tv.setTextSize(sp);
         tv.setTextColor(color);
         tv.setTypeface(Typeface.DEFAULT, style);
-        tv.setIncludeFontPadding(true);
+        tv.setIncludeFontPadding(false);
+        return tv;
+    }
+
+    private TextView mediumText(String value, int sp, int color) {
+        TextView tv = text(value, sp, color, Typeface.NORMAL);
+        tv.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
         return tv;
     }
 
@@ -767,7 +784,7 @@ public class MainActivity extends Activity {
         b.setTextSize(15);
         b.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         b.setTextColor(Color.WHITE);
-        b.setBackground(cardBg(BRAND, BRAND, dp(8)));
+        b.setBackground(cardBg(ACCENT, ACCENT, dp(8)));
         return b;
     }
 
@@ -777,7 +794,7 @@ public class MainActivity extends Activity {
         b.setAllCaps(false);
         b.setTextSize(14);
         b.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        b.setTextColor(BRAND_DARK);
+        b.setTextColor(ACCENT_DARK);
         b.setBackground(cardBg(Color.WHITE, LINE, dp(8)));
         return b;
     }
