@@ -158,17 +158,17 @@ public class MainActivity extends Activity {
         TextView noteTitle = mediumText("Justificativa automatica", 20, TEXT);
         TextView noteHelp = text("Use um contexto curto e marque criterios assistenciais. O texto se atualiza com os escores ja calculados.", 12, MUTED, Typeface.NORMAL);
         noteHelp.setPadding(0, dp(4), 0, dp(12));
-        patientContext = new EditText(this);
-        patientContext.setHint("Ex.: insuficiencia respiratoria aguda, pneumonia grave, choque septico");
-        patientContext.setSingleLine(false);
-        patientContext.setMinLines(2);
-        patientContext.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-        patientContext.setTextColor(TEXT);
-        patientContext.setHintTextColor(Color.rgb(148, 163, 184));
-        patientContext.setTextSize(15);
-        patientContext.setBackground(cardBg(Color.rgb(248, 250, 252), LINE, dp(8)));
-        patientContext.setPadding(dp(12), dp(10), dp(12), dp(10));
-        patientContext.setOnFocusChangeListener((v, hasFocus) -> updateNote());
+        beneficiaryContext = new EditText(this);
+        beneficiaryContext.setHint("Ex.: insuficiencia respiratoria aguda, pneumonia grave, choque septico");
+        beneficiaryContext.setSingleLine(false);
+        beneficiaryContext.setMinLines(2);
+        beneficiaryContext.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        beneficiaryContext.setTextColor(TEXT);
+        beneficiaryContext.setHintTextColor(Color.rgb(148, 163, 184));
+        beneficiaryContext.setTextSize(15);
+        beneficiaryContext.setBackground(cardBg(Color.rgb(248, 250, 252), LINE, dp(8)));
+        beneficiaryContext.setPadding(dp(12), dp(10), dp(12), dp(10));
+        beneficiaryContext.setOnFocusChangeListener((v, hasFocus) -> updateNote());
 
         LinearLayout criteria = column();
         criteria.setPadding(0, dp(12), 0, dp(4));

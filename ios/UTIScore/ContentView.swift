@@ -255,7 +255,7 @@ struct ContentView: View {
                 .font(.system(size: 11))
                 .foregroundStyle(muted)
 
-            TextField("Ex.: insuficiencia respiratoria aguda, pneumonia grave", text: $patientContext, axis: .vertical)
+            TextField("Ex.: insuficiencia respiratoria aguda, pneumonia grave", text: $beneficiaryContext, axis: .vertical)
                 .lineLimit(2...4)
                 .padding(10)
                 .background(fieldBg)
