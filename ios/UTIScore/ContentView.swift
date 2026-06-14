@@ -44,6 +44,7 @@ struct ContentView: View {
 
     private let accent = Color(red: 37 / 255, green: 99 / 255, blue: 235 / 255)
     private let accentDark = Color(red: 30 / 255, green: 64 / 255, blue: 175 / 255)
+    private let accentSoft = Color(red: 219 / 255, green: 234 / 255, blue: 254 / 255)
     private let bg = Color(red: 248 / 255, green: 250 / 255, blue: 252 / 255)
     private let text = Color(red: 15 / 255, green: 23 / 255, blue: 42 / 255)
     private let muted = Color(red: 71 / 255, green: 85 / 255, blue: 105 / 255)
@@ -65,10 +66,12 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     header
                     scorePicker
-                    calculatorCard
-                    resultCard
-                    noteCard
-                    privacyButton
+                    if !menuExpanded {
+                        calculatorCard
+                        resultCard
+                        noteCard
+                        privacyButton
+                    }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 10)
@@ -85,11 +88,11 @@ struct ContentView: View {
     }
 
     private var header: some View {
-        HStack(spacing: 9) {
+        HStack(spacing: 16) {
             Image(uiImage: UIImage(named: "logo_accert") ?? UIImage())
                 .resizable()
                 .scaledToFit()
-                .frame(width: 64, height: 30)
+                .frame(width: 74, height: 34)
 
             VStack(alignment: .leading, spacing: 1) {
                 Text("UTI Score")
@@ -113,20 +116,40 @@ struct ContentView: View {
                     menuExpanded.toggle()
                 }
             } label: {
-                HStack(spacing: 8) {
-                    Text("Escore: \(selectedScore.shortName)")
-                        .font(.system(size: 13, weight: .semibold))
+                HStack(spacing: 10) {
+                    Image(systemName: "slider.horizontal.3")
+                        .font(.system(size: 13, weight: .bold))
+                        .frame(width: 28, height: 28)
+                        .foregroundStyle(.white)
+                        .background(accentDark)
+                        .clipShape(Circle())
+
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("Selecionar escore")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(accentDark.opacity(0.78))
+                        Text(selectedScore.shortName)
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(accentDark)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.82)
+                    }
+
+                    Spacer(minLength: 0)
+
                     Image(systemName: menuExpanded ? "chevron.up" : "chevron.down")
                         .font(.system(size: 12, weight: .bold))
-                    Spacer(minLength: 0)
+                        .frame(width: 30, height: 30)
+                        .foregroundStyle(accentDark)
+                        .background(.white.opacity(0.78))
+                        .clipShape(Circle())
                 }
-                .foregroundStyle(accentDark)
                 .padding(.horizontal, 12)
                 .frame(maxWidth: .infinity)
-                .frame(height: 38)
-                .background(.white)
+                .frame(height: 52)
+                .background(accentSoft)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(accent.opacity(0.28), lineWidth: 1))
             }
             .buttonStyle(.plain)
 
@@ -153,6 +176,7 @@ struct ContentView: View {
                         .buttonStyle(.plain)
                     }
                 }
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
     }

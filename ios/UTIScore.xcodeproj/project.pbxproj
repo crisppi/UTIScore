@@ -10,6 +10,7 @@
 		100000000000000000000011 /* UTIScoreApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000001 /* UTIScoreApp.swift */; };
 		100000000000000000000012 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000002 /* ContentView.swift */; };
 		100000000000000000000013 /* logo_accert.png in Resources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000003 /* logo_accert.png */; };
+		100000000000000000000014 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000006 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -18,6 +19,7 @@
 		100000000000000000000003 /* logo_accert.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo_accert.png; sourceTree = "<group>"; };
 		100000000000000000000004 /* UTIScore.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UTIScore.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		100000000000000000000005 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		100000000000000000000006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -45,6 +47,7 @@
 				100000000000000000000001 /* UTIScoreApp.swift */,
 				100000000000000000000002 /* ContentView.swift */,
 				100000000000000000000005 /* Info.plist */,
+				100000000000000000000006 /* Assets.xcassets */,
 				100000000000000000000003 /* logo_accert.png */,
 			);
 			path = UTIScore;
@@ -117,6 +120,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				100000000000000000000013 /* logo_accert.png in Resources */,
+				100000000000000000000014 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -139,11 +143,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 9G6G7559QB;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = UTIScore/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -162,11 +167,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 9G6G7559QB;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = UTIScore/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -185,9 +191,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 9G6G7559QB;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = UTIScore/Info.plist;
@@ -204,9 +211,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 9G6G7559QB;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = UTIScore/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
