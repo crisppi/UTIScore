@@ -2,11 +2,13 @@ package br.com.accertconsult.UTIScore;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
@@ -45,6 +47,10 @@ public class MainActivity extends Activity {
     private static final int WARNING = Color.rgb(180, 83, 9);
     private static final int EMPTY_RESULT_TEXT_SP = 20;
     private static final int RESULT_TEXT_SP = 24;
+    private static final String CONTACT_EMAIL = "contato@accertconsult.com.br";
+    private static final String FULLCARE_URL = "https://www.accertconsult.com.br/fullcare";
+    private static final String SITE_URL = "https://www.accertconsult.com.br";
+    private static final String LINKEDIN_URL = "https://www.linkedin.com/company/accert-consult/";
 
     private final List<ScoreSpec> specs = new ArrayList<>();
     private final Map<String, FieldView> currentFields = new LinkedHashMap<>();
@@ -102,15 +108,17 @@ public class MainActivity extends Activity {
         header.addView(logo, logoLp);
 
         LinearLayout titleBlock = column();
-        TextView brand = text("UTI Score", 22, TEXT, Typeface.BOLD);
+        TextView brand = text("UTI Score Auditoria", 22, TEXT, Typeface.BOLD);
         titleBlock.addView(brand);
 
-        TextView subtitle = text("Calculadoras e justificativa.", 12, MUTED, Typeface.NORMAL);
+        TextView subtitle = text("Avaliacao de necessidade de UTI.", 12, MUTED, Typeface.NORMAL);
         subtitle.setPadding(0, 0, 0, 0);
         titleBlock.addView(subtitle);
 
         header.addView(titleBlock, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
         root.addView(header, matchWrap());
+
+        addInstitutionalMenu(root);
 
         menuButton = secondaryButton("Escore: SOFA");
         menuButton.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
@@ -155,11 +163,11 @@ public class MainActivity extends Activity {
         root.addView(resultCard);
 
         LinearLayout noteCard = card();
-        TextView noteTitle = mediumText("Justificativa automatica", 20, TEXT);
-        TextView noteHelp = text("Use um contexto curto e marque criterios assistenciais. O texto se atualiza com os escores ja calculados.", 12, MUTED, Typeface.NORMAL);
+        TextView noteTitle = mediumText("Necessidade de UTI", 20, TEXT);
+        TextView noteHelp = text("Informe o quadro clinico e marque sinais de necessidade de UTI.", 12, MUTED, Typeface.NORMAL);
         noteHelp.setPadding(0, dp(4), 0, dp(12));
         beneficiaryContext = new EditText(this);
-        beneficiaryContext.setHint("Ex.: insuficiencia respiratoria aguda, pneumonia grave, choque septico");
+        beneficiaryContext.setHint("Ex.: paciente com dispneia e necessidade de VNI");
         beneficiaryContext.setSingleLine(false);
         beneficiaryContext.setMinLines(2);
         beneficiaryContext.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
@@ -215,6 +223,71 @@ public class MainActivity extends Activity {
         root.addView(privacy, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(48)));
 
         setContentView(scroll);
+    }
+
+    private void addInstitutionalMenu(LinearLayout root) {
+        LinearLayout intro = card();
+        TextView developer = mediumText("Desenvolvido por Accert Consult", 16, TEXT);
+        TextView specialty = text("Especialistas em Auditoria Medica e Inteligencia em Saude", 12, MUTED, Typeface.NORMAL);
+        specialty.setPadding(0, dp(5), 0, dp(12));
+        intro.addView(developer);
+        intro.addView(specialty);
+
+        Button fullCare = institutionalButton("Conheca o FullCare");
+        fullCare.setOnClickListener(v -> openExternal(FULLCARE_URL));
+        intro.addView(fullCare, actionButtonParams(0));
+
+        Button demo = institutionalButton("Solicitar Demonstracao");
+        demo.setOnClickListener(v -> openEmail("Solicitacao de demonstracao do FullCare"));
+        intro.addView(demo, actionButtonParams(8));
+
+        GridLayout actions = new GridLayout(this);
+        actions.setColumnCount(3);
+        actions.setPadding(0, dp(8), 0, 0);
+
+        addInstitutionalGridButton(actions, "Fale Conosco", () -> openEmail("Contato pelo UTI Score Auditoria"));
+        addInstitutionalGridButton(actions, "LinkedIn", () -> openExternal(LINKEDIN_URL));
+        addInstitutionalGridButton(actions, "Site", () -> openExternal(SITE_URL));
+
+        intro.addView(actions, matchWrap());
+        root.addView(intro);
+    }
+
+    private Button institutionalButton(String label) {
+        Button b = secondaryButton(label);
+        b.setTextSize(13);
+        return b;
+    }
+
+    private LinearLayout.LayoutParams actionButtonParams(int topMargin) {
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(42));
+        lp.setMargins(0, topMargin == 0 ? 0 : dp(topMargin), 0, 0);
+        return lp;
+    }
+
+    private void addInstitutionalGridButton(GridLayout host, String label, Runnable action) {
+        Button button = institutionalButton(label);
+        button.setTextSize(12);
+        button.setOnClickListener(v -> action.run());
+        GridLayout.LayoutParams lp = new GridLayout.LayoutParams();
+        lp.width = 0;
+        lp.height = dp(40);
+        lp.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
+        lp.setMargins(0, 0, dp(8), 0);
+        host.addView(button, lp);
+    }
+
+    private void openEmail(String subject) {
+        String uri = "mailto:" + CONTACT_EMAIL + "?subject=" + Uri.encode(subject);
+        openExternal(uri);
+    }
+
+    private void openExternal(String uri) {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(uri)));
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, "Nenhum aplicativo disponivel para abrir este link", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void addCriterion(LinearLayout host, String label) {
@@ -403,8 +476,8 @@ public class MainActivity extends Activity {
     private void copyNote() {
         updateNote();
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        clipboard.setPrimaryClip(ClipData.newPlainText("Justificativa UTI Score", noteText.getText().toString()));
-        Toast.makeText(this, "Justificativa copiada", Toast.LENGTH_SHORT).show();
+        clipboard.setPrimaryClip(ClipData.newPlainText("Avaliacao UTI Score Auditoria", noteText.getText().toString()));
+        Toast.makeText(this, "Avaliacao copiada", Toast.LENGTH_SHORT).show();
     }
 
     private void shareNote() {
@@ -412,7 +485,7 @@ public class MainActivity extends Activity {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, noteText.getText().toString());
-        startActivity(Intent.createChooser(intent, "Compartilhar justificativa"));
+        startActivity(Intent.createChooser(intent, "Compartilhar avaliacao"));
     }
 
     private void showPrivacyPolicy() {
@@ -425,15 +498,15 @@ public class MainActivity extends Activity {
 
     private String privacyPolicyText() {
         return "Ultima atualizacao: 18/05/2026\n\n"
-                + "O UTI Score e um aplicativo de calculadoras clinicas e geracao de justificativa assistencial. O app nao exige cadastro, nao solicita login e nao coleta dados pessoais em servidores.\n\n"
+                + "O UTI Score Auditoria e um aplicativo de calculadoras clinicas e avaliacao de necessidade de UTI. O app nao exige cadastro, nao solicita login e nao coleta dados pessoais em servidores.\n\n"
                 + "Dados inseridos no app\n"
-                + "As informacoes digitadas ou selecionadas pelo usuario, incluindo contexto clinico, criterios assistenciais e resultados dos escores, sao usadas apenas para calcular e montar a justificativa exibida na tela. Esses dados permanecem no proprio aparelho durante o uso e nao sao enviados automaticamente para a Accert Consult ou para terceiros.\n\n"
+                + "As informacoes digitadas ou selecionadas pelo usuario, incluindo contexto clinico, criterios assistenciais e resultados dos escores, sao usadas apenas para calcular e montar a avaliacao exibida na tela. Esses dados permanecem no proprio aparelho durante o uso e nao sao enviados automaticamente para a Accert Consult ou para terceiros.\n\n"
                 + "Compartilhamento pelo usuario\n"
                 + "Quando o usuario toca em Copiar, o texto e colocado na area de transferencia do dispositivo. Quando toca em Compartilhar, o Android abre os aplicativos disponiveis no aparelho para que o usuario escolha para onde enviar o texto. Nesses casos, o tratamento dos dados passa a depender do aplicativo escolhido pelo usuario.\n\n"
                 + "Permissoes, analytics e publicidade\n"
                 + "O app nao solicita permissao de internet, localizacao, camera, microfone, contatos ou arquivos. Tambem nao utiliza publicidade, rastreadores, analytics, Firebase ou ferramentas de monitoramento de comportamento.\n\n"
                 + "Uso clinico\n"
-                + "Os escores apresentados sao ferramentas de apoio e nao substituem avaliacao medica, protocolos institucionais ou diretrizes aplicaveis. O usuario e responsavel por validar as informacoes antes de usar ou compartilhar a justificativa.\n\n"
+                + "Os escores apresentados sao ferramentas de apoio e nao substituem avaliacao medica. O usuario e responsavel por validar as informacoes antes de usar ou compartilhar a avaliacao.\n\n"
                 + "Contato\n"
                 + "Em caso de duvidas sobre privacidade, entre em contato com a Accert Consult.";
     }

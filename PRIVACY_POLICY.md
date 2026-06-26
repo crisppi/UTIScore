@@ -1,12 +1,12 @@
-# Politica de privacidade - UTI Score
+# Politica de privacidade - UTI Score Auditoria
 
 Ultima atualizacao: 18/05/2026
 
-O UTI Score e um aplicativo de calculadoras clinicas e geracao de justificativa assistencial. O app nao exige cadastro, nao solicita login e nao coleta dados pessoais em servidores.
+O UTI Score Auditoria e um aplicativo de calculadoras clinicas e avaliacao de necessidade de UTI. O app nao exige cadastro, nao solicita login e nao coleta dados pessoais em servidores.
 
 ## Dados inseridos no app
 
-As informacoes digitadas ou selecionadas pelo usuario, incluindo contexto clinico, criterios assistenciais e resultados dos escores, sao usadas apenas para calcular e montar a justificativa exibida na tela.
+As informacoes digitadas ou selecionadas pelo usuario, incluindo contexto clinico, criterios assistenciais e resultados dos escores, sao usadas apenas para calcular e montar a avaliacao exibida na tela.
 
 Esses dados permanecem no proprio aparelho durante o uso e nao sao enviados automaticamente para a Accert Consult ou para terceiros. O app nao mantem historico permanente dessas informacoes.
 
@@ -24,9 +24,9 @@ O app tambem nao utiliza publicidade, rastreadores, analytics, Firebase ou ferra
 
 ## Uso clinico
 
-Os escores apresentados sao ferramentas de apoio e nao substituem avaliacao medica, protocolos institucionais ou diretrizes aplicaveis.
+Os escores apresentados sao ferramentas de apoio e nao substituem avaliacao medica.
 
-O usuario e responsavel por validar as informacoes antes de usar ou compartilhar a justificativa.
+O usuario e responsavel por validar as informacoes antes de usar ou compartilhar a avaliacao.
 
 ## Alteracoes nesta politica
 

@@ -14,11 +14,19 @@ struct ScoreField: Identifiable {
     let ignoreInDefaultSum: Bool
 }
 
+struct ClinicalReference: Identifiable {
+    let id: String
+    let title: String
+    let citation: String
+    let url: URL
+}
+
 struct ScoreDefinition: Identifiable {
     let id: String
     let shortName: String
     let title: String
     let helper: String
+    let reference: ClinicalReference
     let fields: [ScoreField]
     let evaluate: ([String: Int]) -> ScoreResult
 }
@@ -28,6 +36,13 @@ struct ScoreResult {
     let classification: String
     let risk: String
     let summary: String
+}
+
+enum BrandLinks {
+    static let email = "contato@accertconsult.com.br"
+    static let fullCare = URL(string: "https://www.accertconsult.com.br/fullcare")!
+    static let site = URL(string: "https://www.accertconsult.com.br")!
+    static let linkedIn = URL(string: "https://www.linkedin.com/company/accert-consult/")!
 }
 
 struct ContentView: View {
@@ -40,7 +55,9 @@ struct ContentView: View {
     @State private var beneficiaryContext = ""
     @State private var criteria: Set<String> = []
     @State private var privacyVisible = false
+    @State private var referencesVisible = false
     @State private var copiedVisible = false
+    @State private var noteVisible = false
 
     private let accent = Color(red: 37 / 255, green: 99 / 255, blue: 235 / 255)
     private let accentDark = Color(red: 30 / 255, green: 64 / 255, blue: 175 / 255)
@@ -65,6 +82,7 @@ struct ContentView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     header
+                    brandIntro
                     scorePicker
                     if !menuExpanded {
                         calculatorCard
@@ -82,7 +100,10 @@ struct ContentView: View {
         .sheet(isPresented: $privacyVisible) {
             PrivacyPolicyView()
         }
-        .alert("Justificativa copiada", isPresented: $copiedVisible) {
+        .sheet(isPresented: $referencesVisible) {
+            ClinicalReferencesView(references: ScoreLibrary.references)
+        }
+        .alert("Avaliacao copiada", isPresented: $copiedVisible) {
             Button("OK", role: .cancel) {}
         }
     }
@@ -95,10 +116,10 @@ struct ContentView: View {
                 .frame(width: 74, height: 34)
 
             VStack(alignment: .leading, spacing: 1) {
-                Text("UTI Score")
+                Text("UTI Score Auditoria")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(text)
-                Text("Calculadoras e justificativa.")
+                Text("Avaliacao de necessidade de UTI.")
                     .font(.system(size: 11))
                     .foregroundStyle(muted)
             }
@@ -107,6 +128,53 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, 4)
         .padding(.bottom, 2)
+    }
+
+    private var brandIntro: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Desenvolvido por Accert Consult")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(text)
+            Text("Especialistas em Auditoria Medica e Inteligencia em Saude")
+                .font(.system(size: 11))
+                .foregroundStyle(muted)
+                .padding(.bottom, 2)
+
+            Link(destination: BrandLinks.fullCare) {
+                footerButtonLabel("Conheca o FullCare", systemImage: "cross.case")
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                openEmail(subject: "Solicitacao de demonstracao do FullCare")
+            } label: {
+                footerButtonLabel("Solicitar Demonstracao", systemImage: "calendar.badge.plus")
+            }
+            .buttonStyle(.plain)
+
+            HStack(spacing: 8) {
+                Button {
+                    openEmail(subject: "Contato pelo UTI Score Auditoria")
+                } label: {
+                    footerButtonLabel("Fale Conosco", systemImage: "envelope")
+                }
+                .buttonStyle(.plain)
+
+                Link(destination: BrandLinks.linkedIn) {
+                    footerButtonLabel("LinkedIn", systemImage: "person.2")
+                }
+                .buttonStyle(.plain)
+
+                Link(destination: BrandLinks.site) {
+                    footerButtonLabel("Site", systemImage: "globe")
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(11)
+        .background(.white)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
     }
 
     private var scorePicker: some View {
@@ -158,6 +226,7 @@ struct ContentView: View {
                     ForEach(scores) { score in
                         Button {
                             selectedScoreID = score.id
+                            noteVisible = false
                             withAnimation(.easeInOut(duration: 0.18)) {
                                 menuExpanded = false
                             }
@@ -190,6 +259,8 @@ struct ContentView: View {
                 .font(.system(size: 11))
                 .foregroundStyle(muted)
                 .padding(.bottom, 2)
+
+            referenceRow(selectedScore.reference)
 
             ForEach(selectedScore.fields) { field in
                 VStack(alignment: .leading, spacing: 5) {
@@ -257,6 +328,7 @@ struct ContentView: View {
                 Text(result.risk)
                     .font(.system(size: 12))
                     .foregroundStyle(muted)
+                referenceRow(selectedScore.reference)
             } else {
                 Text("Preencha e calcule")
                     .font(.system(size: 16, weight: .medium))
@@ -272,19 +344,26 @@ struct ContentView: View {
 
     private var noteCard: some View {
         VStack(alignment: .leading, spacing: 9) {
-            Text("Justificativa automatica")
+            Text("Necessidade de UTI")
                 .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(text)
-            Text("Use um contexto curto e marque criterios assistenciais. O texto se atualiza com os escores ja calculados.")
-                .font(.system(size: 11))
-                .foregroundStyle(muted)
 
-            TextField("Ex.: insuficiencia respiratoria aguda, pneumonia grave", text: $beneficiaryContext, axis: .vertical)
+            Text("Quadro clinico que motivou a avaliacao")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(text)
+
+            TextField("Ex.: paciente com dispneia e necessidade de VNI", text: $beneficiaryContext, axis: .vertical)
                 .lineLimit(2...4)
+                .foregroundStyle(text)
+                .tint(accentDark)
                 .padding(10)
                 .background(fieldBg)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
+
+            Text("Sinais de necessidade de UTI")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(text)
 
             ForEach(ScoreLibrary.criteria, id: \.self) { item in
                 Toggle(item, isOn: Binding(
@@ -296,40 +375,63 @@ struct ContentView: View {
                 .font(.system(size: 12))
             }
 
-            Text(noteText)
-                .font(.system(size: 12))
-                .foregroundStyle(text)
-                .padding(10)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(fieldBg)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
-
-            HStack(spacing: 12) {
-                Button {
-                    UIPasteboard.general.string = noteText
-                    copiedVisible = true
-                } label: {
-                    Text("Copiar")
-                        .font(.system(size: 13, weight: .medium))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 40)
+            Button(currentResult == nil ? "Calcule o escore acima" : noteVisible ? "Atualizar avaliacao" : "Avaliar necessidade de UTI") {
+                withAnimation(.easeInOut(duration: 0.18)) {
+                    noteVisible = true
                 }
-                .foregroundStyle(accentDark)
-                .background(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
+            }
+            .font(.system(size: 14, weight: .medium))
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: 42)
+            .background(currentResult == nil ? muted.opacity(0.45) : accent)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .padding(.top, 2)
+            .disabled(currentResult == nil)
 
-                ShareLink(item: noteText) {
-                    Text("Compartilhar")
-                        .font(.system(size: 13, weight: .medium))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 40)
+            if noteVisible {
+                Text("Avaliacao pronta para copiar")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(text)
+                    .transition(.opacity)
+
+                Text(noteText)
+                    .font(.system(size: 12))
+                    .foregroundStyle(text)
+                    .padding(10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(fieldBg)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
+                    .transition(.opacity)
+
+                HStack(spacing: 12) {
+                    Button {
+                        UIPasteboard.general.string = noteText
+                        copiedVisible = true
+                    } label: {
+                        Text("Copiar")
+                            .font(.system(size: 13, weight: .medium))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 40)
+                    }
+                    .foregroundStyle(accentDark)
+                    .background(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
+
+                    ShareLink(item: noteText) {
+                        Text("Compartilhar")
+                            .font(.system(size: 13, weight: .medium))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 40)
+                    }
+                    .foregroundStyle(accentDark)
+                    .background(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
                 }
-                .foregroundStyle(accentDark)
-                .background(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
+                .transition(.opacity)
             }
         }
         .padding(11)
@@ -339,34 +441,74 @@ struct ContentView: View {
     }
 
     private var privacyButton: some View {
-        Button {
-            privacyVisible = true
-        } label: {
-            Text("Politica de privacidade")
-                .font(.system(size: 13, weight: .medium))
-                .frame(maxWidth: .infinity)
-                .frame(height: 42)
-                .foregroundStyle(accentDark)
-                .background(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
+        VStack(spacing: 8) {
+            Button {
+                referencesVisible = true
+            } label: {
+                footerButtonLabel("Referencias clinicas", systemImage: "book.closed")
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                privacyVisible = true
+            } label: {
+                footerButtonLabel("Politica de privacidade", systemImage: "lock.shield")
+            }
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
+    }
+
+    private func footerButtonLabel(_ title: String, systemImage: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: systemImage)
+                .font(.system(size: 13, weight: .semibold))
+            Text(title)
+                .font(.system(size: 13, weight: .medium))
+                .lineLimit(1)
+                .minimumScaleFactor(0.72)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 42)
+        .foregroundStyle(accentDark)
+        .background(.white)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
+    }
+
+    private func referenceRow(_ reference: ClinicalReference) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text("Fonte clinica")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(muted)
+            Text(reference.citation)
+                .font(.system(size: 11))
+                .foregroundStyle(muted)
+                .fixedSize(horizontal: false, vertical: true)
+            Link("Abrir referencia", destination: reference.url)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(accentDark)
+        }
+        .padding(9)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(accentSoft.opacity(0.45))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
     private var noteText: String {
         let context = beneficiaryContext.trimmingCharacters(in: .whitespacesAndNewlines)
-        var text = "Beneficiário "
-        text += context.isEmpty ? "em avaliacao para suporte intensivo" : "com \(context)"
-        if !savedResults.isEmpty {
-            let summaries = scores.compactMap { savedResults[$0.id]?.summary }
-            text += ", apresentando " + summaries.joined(separator: "; ")
+        var text = context.isEmpty ? "Motivo da avaliacao: quadro clinico em avaliacao para suporte intensivo." : "Motivo da avaliacao: \(context)."
+        if let result = currentResult {
+            text += " Escore avaliado: \(selectedScore.shortName) - \(result.summary)."
         }
         let selectedCriteria = ScoreLibrary.criteria.filter { criteria.contains($0) }
         if !selectedCriteria.isEmpty {
-            text += ". Associa " + selectedCriteria.map { $0.lowercased() }.joined(separator: ", ")
+            text += " Sinais clinicos marcados: " + selectedCriteria.map { $0.lowercased() }.joined(separator: ", ") + "."
         }
-        text += ". Mantem criterios clinicos para acompanhamento em unidade de terapia intensiva, com necessidade de monitorizacao continua, intervencoes oportunas e reavaliacao seriada conforme evolucao."
+        if selectedCriteria.isEmpty {
+            text += " Avaliacao: pelos dados informados, nao ha indicacao objetiva de UTI neste momento. Manter acompanhamento e reavaliar se houver piora clinica."
+        } else {
+            text += " Avaliacao: ha indicacao de UTI para monitorizacao continua, intervencoes oportunas e reavaliacao seriada conforme evolucao clinica."
+        }
         return text
     }
 
@@ -377,6 +519,13 @@ struct ContentView: View {
 
     private func calculate() {
         savedResults[selectedScore.id] = selectedScore.evaluate(selections)
+    }
+
+    private func openEmail(subject: String) {
+        let encodedSubject = subject.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? subject
+        if let url = URL(string: "mailto:\(BrandLinks.email)?subject=\(encodedSubject)") {
+            UIApplication.shared.open(url)
+        }
     }
 }
 
@@ -405,10 +554,10 @@ struct PrivacyPolicyView: View {
     private static let policyText = """
     Ultima atualizacao: 18/05/2026
 
-    O UTI Score e um aplicativo de calculadoras clinicas e geracao de justificativa assistencial. O app nao exige cadastro, nao solicita login e nao coleta dados pessoais em servidores.
+    O UTI Score Auditoria e um aplicativo de calculadoras clinicas e avaliacao de necessidade de UTI. O app nao exige cadastro, nao solicita login e nao coleta dados pessoais em servidores.
 
     Dados inseridos no app
-    As informacoes digitadas ou selecionadas pelo usuario, incluindo contexto clinico, criterios assistenciais e resultados dos escores, sao usadas apenas para calcular e montar a justificativa exibida na tela. Esses dados permanecem no proprio aparelho durante o uso e nao sao enviados automaticamente para a Accert Consult ou para terceiros.
+    As informacoes digitadas ou selecionadas pelo usuario, incluindo contexto clinico, criterios assistenciais e resultados dos escores, sao usadas apenas para calcular e montar a avaliacao exibida na tela. Esses dados permanecem no proprio aparelho durante o uso e nao sao enviados automaticamente para a Accert Consult ou para terceiros.
 
     Compartilhamento pelo usuario
     Quando o usuario toca em Copiar, o texto e colocado na area de transferencia do dispositivo. Quando toca em Compartilhar, o iOS abre os aplicativos disponiveis no aparelho para que o usuario escolha para onde enviar o texto. Nesses casos, o tratamento dos dados passa a depender do aplicativo escolhido pelo usuario.
@@ -417,11 +566,55 @@ struct PrivacyPolicyView: View {
     O app nao solicita permissao de internet, localizacao, camera, microfone, contatos ou arquivos. Tambem nao utiliza publicidade, rastreadores, analytics, Firebase ou ferramentas de monitoramento de comportamento.
 
     Uso clinico
-    Os escores apresentados sao ferramentas de apoio e nao substituem avaliacao medica, protocolos institucionais ou diretrizes aplicaveis. O usuario e responsavel por validar as informacoes antes de usar ou compartilhar a justificativa.
+    Os escores apresentados sao ferramentas de apoio e nao substituem avaliacao medica. O usuario e responsavel por validar as informacoes antes de usar ou compartilhar a avaliacao.
 
     Contato
     Em caso de duvidas sobre privacidade, entre em contato com a Accert Consult.
     """
+}
+
+struct ClinicalReferencesView: View {
+    @Environment(\.dismiss) private var dismiss
+    let references: [ClinicalReference]
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 14) {
+                    Text("As calculadoras sao ferramentas de apoio e devem ser interpretadas por profissional habilitado no contexto clinico completo.")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Color(red: 71 / 255, green: 85 / 255, blue: 105 / 255))
+
+                    ForEach(references) { reference in
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text(reference.title)
+                                .font(.system(size: 15, weight: .semibold))
+                            Text(reference.citation)
+                                .font(.system(size: 13))
+                                .foregroundStyle(Color(red: 71 / 255, green: 85 / 255, blue: 105 / 255))
+                            Link("Abrir fonte", destination: reference.url)
+                                .font(.system(size: 13, weight: .semibold))
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(11)
+                        .background(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
+                    }
+                }
+                .padding(16)
+            }
+            .background(Color(red: 248 / 255, green: 250 / 255, blue: 252 / 255))
+            .navigationTitle("Referencias clinicas")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Entendi") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
 }
 
 enum ScoreLibrary {
@@ -449,6 +642,79 @@ enum ScoreLibrary {
         timi()
     ]
 
+    static let references: [ClinicalReference] = [
+        sofaReference,
+        apacheReference,
+        glasgowReference,
+        curb65Reference,
+        wellsReference,
+        qsofaReference,
+        cha2ds2Reference,
+        hasBledReference,
+        childPughReference,
+        timiReference
+    ]
+
+    private static let sofaReference = ref(
+        "SOFA",
+        "Vincent JL et al. The SOFA score to describe organ dysfunction/failure. Intensive Care Med. 1996.",
+        "https://pubmed.ncbi.nlm.nih.gov/8844239/"
+    )
+
+    private static let apacheReference = ref(
+        "APACHE II",
+        "Knaus WA et al. APACHE II: a severity of disease classification system. Crit Care Med. 1985.",
+        "https://pubmed.ncbi.nlm.nih.gov/3928249/"
+    )
+
+    private static let glasgowReference = ref(
+        "Glasgow Coma Scale",
+        "Teasdale G, Jennett B. Assessment of coma and impaired consciousness. Lancet. 1974.",
+        "https://pubmed.ncbi.nlm.nih.gov/4136544/"
+    )
+
+    private static let curb65Reference = ref(
+        "CURB-65",
+        "Lim WS et al. Defining community acquired pneumonia severity on presentation to hospital. Thorax. 2003.",
+        "https://pubmed.ncbi.nlm.nih.gov/12728155/"
+    )
+
+    private static let wellsReference = ref(
+        "Wells para TEP",
+        "Wells PS et al. Derivation of a simple clinical model for pulmonary embolism probability. Thromb Haemost. 2000.",
+        "https://pubmed.ncbi.nlm.nih.gov/10744147/"
+    )
+
+    private static let qsofaReference = ref(
+        "qSOFA",
+        "Seymour CW et al. Assessment of clinical criteria for sepsis. JAMA. 2016.",
+        "https://pubmed.ncbi.nlm.nih.gov/26903335/"
+    )
+
+    private static let cha2ds2Reference = ref(
+        "CHA2DS2-VASc",
+        "Lip GYH et al. Refining clinical risk stratification for stroke and thromboembolism in atrial fibrillation. Chest. 2010.",
+        "https://pubmed.ncbi.nlm.nih.gov/19762550/"
+    )
+
+    private static let hasBledReference = ref(
+        "HAS-BLED",
+        "Pisters R et al. A novel user-friendly score to assess bleeding risk in atrial fibrillation. Chest. 2010.",
+        "https://pubmed.ncbi.nlm.nih.gov/20299623/"
+    )
+
+    private static let childPughReference = ref(
+        "Child-Pugh",
+        "Pugh RN et al. Transection of the oesophagus for bleeding oesophageal varices. Br J Surg. 1973.",
+        "https://pubmed.ncbi.nlm.nih.gov/4541913/"
+    )
+
+    private static let timiReference = ref(
+        "TIMI UA/NSTEMI",
+        "Antman EM et al. The TIMI risk score for unstable angina/non-ST elevation MI. JAMA. 2000.",
+        "https://pubmed.ncbi.nlm.nih.gov/10938172/"
+    )
+
     private static func sofa() -> ScoreDefinition {
         let fields = [
             field("resp", "Respiratorio - PaO2/FiO2", [(">= 400", 0), ("< 400", 1), ("< 300", 2), ("< 200 com suporte ventilatorio", 3), ("< 100 com suporte ventilatorio", 4)]),
@@ -458,7 +724,7 @@ enum ScoreLibrary {
             field("cns", "Neurologico - Glasgow", [("15", 0), ("13 a 14", 1), ("10 a 12", 2), ("6 a 9", 3), ("< 6", 4)]),
             field("renal", "Renal - creatinina ou diurese", [("< 1,2 mg/dL", 0), ("1,2 a 1,9 mg/dL", 1), ("2,0 a 3,4 mg/dL", 2), ("3,5 a 4,9 mg/dL ou diurese < 500 mL/dia", 3), (">= 5,0 mg/dL ou diurese < 200 mL/dia", 4)])
         ]
-        return ScoreDefinition(id: "sofa", shortName: "SOFA", title: "SOFA", helper: "Avalia disfuncao organica em seis sistemas. Selecione a pior variavel recente.", fields: fields) { selections in
+        return ScoreDefinition(id: "sofa", shortName: "SOFA", title: "SOFA", helper: "Avalia disfuncao organica em seis sistemas. Selecione a pior variavel recente.", reference: sofaReference, fields: fields) { selections in
             let score = sum(fields, selections)
             let cls = score <= 6 ? "Disfuncao leve a moderada" : score <= 9 ? "Disfuncao importante" : score <= 12 ? "Alto risco" : "Risco muito elevado"
             let risk = score <= 6 ? "Risco estimado baixo a moderado; interpretar pela tendencia e contexto clinico." : score <= 9 ? "Risco estimado aumentado, com necessidade de vigilancia intensiva." : score <= 12 ? "Risco estimado alto de mortalidade e deterioracao." : "Risco estimado muito alto, compativel com disfuncao multiorganica grave."
@@ -484,7 +750,7 @@ enum ScoreLibrary {
             field("age", "Idade", [("<= 44", 0), ("45 a 54", 2), ("55 a 64", 3), ("65 a 74", 5), (">= 75", 6)]),
             field("chronic", "Saude cronica", [("Sem insuficiencia organica grave/imunossupressao", 0), ("Pos-operatorio eletivo com condicao cronica grave", 2), ("Clinico ou pos-operatorio de urgencia com condicao cronica grave", 5)])
         ]
-        return ScoreDefinition(id: "apache", shortName: "APACHE II", title: "APACHE II", helper: "Estimativa de gravidade nas primeiras 24 horas de UTI. Risco exibido e aproximado.", fields: fields) { selections in
+        return ScoreDefinition(id: "apache", shortName: "APACHE II", title: "APACHE II", helper: "Estimativa de gravidade nas primeiras 24 horas de UTI. Risco exibido e aproximado.", reference: apacheReference, fields: fields) { selections in
             var score = sum(fields, selections)
             if selected("arf", fields, selections) > 0 {
                 score += selected("creat", fields, selections)
@@ -500,7 +766,7 @@ enum ScoreLibrary {
             field("verbal", "Resposta verbal", [("Orientada", 5), ("Confusa", 4), ("Palavras inapropriadas", 3), ("Sons incompreensiveis", 2), ("Nenhuma", 1)]),
             field("motor", "Resposta motora", [("Obedece comandos", 6), ("Localiza dor", 5), ("Retirada a dor", 4), ("Flexao anormal", 3), ("Extensao anormal", 2), ("Nenhuma", 1)])
         ]
-        return ScoreDefinition(id: "glasgow", shortName: "Glasgow", title: "Glasgow Coma Scale", helper: "Selecao por toque das respostas ocular, verbal e motora.", fields: fields) { selections in
+        return ScoreDefinition(id: "glasgow", shortName: "Glasgow", title: "Glasgow Coma Scale", helper: "Selecao por toque das respostas ocular, verbal e motora.", reference: glasgowReference, fields: fields) { selections in
             let score = sum(fields, selections)
             let cls = score >= 13 ? "Trauma/alteracao leve" : score >= 9 ? "Moderado" : "Grave"
             let risk = score <= 8 ? "Sugere rebaixamento importante e necessidade de protecao de via aerea conforme contexto." : "Interpretar junto de sedacao, intubacao e causa metabolica/neurologica."
@@ -510,7 +776,7 @@ enum ScoreLibrary {
 
     private static func curb65() -> ScoreDefinition {
         let fields = yesNoFields([("confusion", "Confusao mental"), ("urea", "Ureia > 7 mmol/L ou BUN > 19 mg/dL"), ("rr", "FR >= 30 irpm"), ("bp", "PAS < 90 ou PAD <= 60 mmHg"), ("age", "Idade >= 65 anos")])
-        return ScoreDefinition(id: "curb65", shortName: "CURB-65", title: "CURB-65", helper: "Estratificacao de pneumonia adquirida na comunidade.", fields: fields) { selections in
+        return ScoreDefinition(id: "curb65", shortName: "CURB-65", title: "CURB-65", helper: "Estratificacao de pneumonia adquirida na comunidade.", reference: curb65Reference, fields: fields) { selections in
             let score = sum(fields, selections)
             let cls = score <= 1 ? "Baixo risco" : score == 2 ? "Risco intermediario" : "Alto risco"
             let risk = score <= 1 ? "Mortalidade baixa; considerar tratamento ambulatorial se contexto permitir." : score == 2 ? "Risco intermediario; considerar internacao hospitalar." : "Alto risco; considerar UTI, especialmente com instabilidade ou falencia organica."
@@ -528,7 +794,7 @@ enum ScoreLibrary {
             field("hemoptysis", "Hemoptise", [("Nao", 0), ("Sim", 1)]),
             field("cancer", "Cancer ativo", [("Nao", 0), ("Sim", 1)])
         ]
-        return ScoreDefinition(id: "wells", shortName: "Wells", title: "Wells para TEP", helper: "Probabilidade clinica de tromboembolismo pulmonar.", fields: fields) { selections in
+        return ScoreDefinition(id: "wells", shortName: "Wells", title: "Wells para TEP", helper: "Probabilidade clinica de tromboembolismo pulmonar.", reference: wellsReference, fields: fields) { selections in
             let score = sum(fields, selections)
             let cls = score <= 4 ? "TEP improvavel (modelo dicotomico)" : "TEP provavel (modelo dicotomico)"
             let risk = score < 2 ? "Baixa probabilidade no modelo de tres categorias." : score <= 6 ? "Probabilidade intermediaria no modelo de tres categorias." : "Alta probabilidade no modelo de tres categorias."
@@ -538,7 +804,7 @@ enum ScoreLibrary {
 
     private static func qsofa() -> ScoreDefinition {
         let fields = yesNoFields([("rr", "FR >= 22 irpm"), ("mental", "Alteracao do nivel de consciencia"), ("bp", "PAS <= 100 mmHg")])
-        return ScoreDefinition(id: "qsofa", shortName: "qSOFA", title: "qSOFA", helper: "Triagem rapida de risco em infeccao suspeita fora da UTI.", fields: fields) { selections in
+        return ScoreDefinition(id: "qsofa", shortName: "qSOFA", title: "qSOFA", helper: "Triagem rapida de risco em infeccao suspeita fora da UTI.", reference: qsofaReference, fields: fields) { selections in
             let score = sum(fields, selections)
             let cls = score >= 2 ? "Maior risco de mau desfecho" : "Menor risco pelo qSOFA"
             let risk = score >= 2 ? "Sugere risco aumentado; avaliar sepse, disfuncao organica e necessidade de escalonamento." : "Nao exclui sepse; seguir avaliacao clinica e laboratorial."
@@ -557,7 +823,7 @@ enum ScoreLibrary {
             field("age65", "Idade 65 a 74 anos", [("Nao", 0), ("Sim", 1)]),
             field("female", "Sexo feminino", [("Nao", 0), ("Sim", 1)])
         ]
-        return ScoreDefinition(id: "cha2ds2", shortName: "CHA2DS2", title: "CHA2DS2-VASc", helper: "Risco tromboembolico em fibrilacao atrial nao valvar.", fields: fields) { selections in
+        return ScoreDefinition(id: "cha2ds2", shortName: "CHA2DS2", title: "CHA2DS2-VASc", helper: "Risco tromboembolico em fibrilacao atrial nao valvar.", reference: cha2ds2Reference, fields: fields) { selections in
             var score = sum(fields, selections)
             if selected("age75", fields, selections) > 0 && selected("age65", fields, selections) > 0 {
                 score -= 1
@@ -569,7 +835,7 @@ enum ScoreLibrary {
 
     private static func hasBled() -> ScoreDefinition {
         let fields = yesNoFields([("htn", "Hipertensao nao controlada"), ("renal", "Funcao renal alterada"), ("liver", "Funcao hepatica alterada"), ("stroke", "AVC previo"), ("bleeding", "Sangramento previo ou predisposicao"), ("inr", "INR labil"), ("elderly", "Idade > 65 anos"), ("drugs", "Drogas que aumentam sangramento"), ("alcohol", "Alcool")])
-        return ScoreDefinition(id: "hasbled", shortName: "HAS-BLED", title: "HAS-BLED", helper: "Risco de sangramento em beneficiários anticoagulados.", fields: fields) { selections in
+        return ScoreDefinition(id: "hasbled", shortName: "HAS-BLED", title: "HAS-BLED", helper: "Risco de sangramento em beneficiários anticoagulados.", reference: hasBledReference, fields: fields) { selections in
             let score = sum(fields, selections)
             let cls = score >= 3 ? "Alto risco de sangramento" : "Risco nao alto"
             let risk = score >= 3 ? "Exige correcao de fatores modificaveis e seguimento mais proximo; nao e contraindicacao automatica a anticoagulacao." : "Manter avaliacao de fatores modificaveis."
@@ -585,7 +851,7 @@ enum ScoreLibrary {
             field("ascites", "Ascite", [("Ausente", 1), ("Leve/moderada controlada", 2), ("Tensa ou refrataria", 3)]),
             field("enceph", "Encefalopatia", [("Ausente", 1), ("Grau I-II", 2), ("Grau III-IV", 3)])
         ]
-        return ScoreDefinition(id: "childpugh", shortName: "Child-Pugh", title: "Child-Pugh", helper: "Classificacao de gravidade da cirrose.", fields: fields) { selections in
+        return ScoreDefinition(id: "childpugh", shortName: "Child-Pugh", title: "Child-Pugh", helper: "Classificacao de gravidade da cirrose.", reference: childPughReference, fields: fields) { selections in
             let score = sum(fields, selections)
             let cls = score <= 6 ? "Classe A" : score <= 9 ? "Classe B" : "Classe C"
             let risk = cls == "Classe A" ? "Doenca compensada ou menor gravidade relativa." : cls == "Classe B" ? "Gravidade intermediaria." : "Doenca avancada, maior risco de complicacoes e mortalidade."
@@ -595,7 +861,7 @@ enum ScoreLibrary {
 
     private static func timi() -> ScoreDefinition {
         let fields = yesNoFields([("age", "Idade >= 65 anos"), ("risk", "Tres ou mais fatores de risco coronariano"), ("stenosis", "Estenose coronariana conhecida >= 50%"), ("aspirin", "Uso de AAS nos ultimos 7 dias"), ("angina", "Dois ou mais episodios de angina em 24h"), ("st", "Desvio de ST"), ("marker", "Marcadores cardiacos positivos")])
-        return ScoreDefinition(id: "timi", shortName: "TIMI", title: "TIMI UA/NSTEMI", helper: "Risco em sindrome coronariana aguda sem supra.", fields: fields) { selections in
+        return ScoreDefinition(id: "timi", shortName: "TIMI", title: "TIMI UA/NSTEMI", helper: "Risco em sindrome coronariana aguda sem supra.", reference: timiReference, fields: fields) { selections in
             let score = sum(fields, selections)
             let cls = score <= 2 ? "Baixo risco" : score <= 4 ? "Risco intermediario" : "Alto risco"
             return result("TIMI", score, cls, "Risco aproximado de evento em 14 dias: \(timiRisk(Int(score))).", unit: "")
@@ -608,6 +874,10 @@ enum ScoreLibrary {
 
     private static func yesNoFields(_ raw: [(String, String)]) -> [ScoreField] {
         raw.map { field($0.0, $0.1, [("Nao", 0), ("Sim", 1)]) }
+    }
+
+    private static func ref(_ title: String, _ citation: String, _ url: String) -> ClinicalReference {
+        ClinicalReference(id: title, title: title, citation: citation, url: URL(string: url)!)
     }
 
     private static func selected(_ id: String, _ fields: [ScoreField], _ selections: [String: Int]) -> Double {
