@@ -14,6 +14,15 @@ Aplicativo Android nativo para calculadoras de UTI e geracao de justificativa cl
 - HAS-BLED
 - Child-Pugh
 - TIMI UA/NSTEMI
+- SAPS 3
+- NEWS2
+- MEWS
+- KDIGO para lesao renal aguda
+- Relacao P/F e indice de oxigenacao
+- sPESI
+- RASS
+- Braden
+- Criterios Sepsis-3 para sepse e choque septico
 
 ## Build
 

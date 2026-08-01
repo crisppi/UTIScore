@@ -51,6 +51,7 @@ struct ContentView: View {
     @State private var selectedScoreID = "sofa"
     @State private var menuExpanded = false
     @State private var selections: [String: Int] = [:]
+    @State private var selectionsByScore: [String: [String: Int]] = [:]
     @State private var savedResults: [String: ScoreResult] = [:]
     @State private var beneficiaryContext = ""
     @State private var criteria: Set<String> = []
@@ -82,7 +83,6 @@ struct ContentView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     header
-                    brandIntro
                     scorePicker
                     if !menuExpanded {
                         calculatorCard
@@ -119,9 +119,6 @@ struct ContentView: View {
                 Text("UTI Score Auditoria")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(text)
-                Text("Avaliacao de necessidade de UTI.")
-                    .font(.system(size: 11))
-                    .foregroundStyle(muted)
             }
             Spacer(minLength: 0)
         }
@@ -225,7 +222,9 @@ struct ContentView: View {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                     ForEach(scores) { score in
                         Button {
+                            selectionsByScore[selectedScoreID] = selections
                             selectedScoreID = score.id
+                            selections = selectionsByScore[score.id] ?? [:]
                             noteVisible = false
                             withAnimation(.easeInOut(duration: 0.18)) {
                                 menuExpanded = false
@@ -306,6 +305,22 @@ struct ContentView: View {
             .frame(height: 42)
             .background(accent)
             .clipShape(RoundedRectangle(cornerRadius: 8))
+
+            Button("Novo paciente / Limpar tudo") {
+                selections = [:]
+                selectionsByScore = [:]
+                savedResults = [:]
+                beneficiaryContext = ""
+                criteria = []
+                noteVisible = false
+            }
+            .font(.system(size: 14, weight: .semibold))
+            .foregroundStyle(accentDark)
+            .frame(maxWidth: .infinity)
+            .frame(height: 42)
+            .background(.white)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray5), lineWidth: 1))
         }
         .padding(11)
         .background(.white)
@@ -518,6 +533,7 @@ struct ContentView: View {
     }
 
     private func calculate() {
+        selectionsByScore[selectedScore.id] = selections
         savedResults[selectedScore.id] = selectedScore.evaluate(selections)
     }
 
@@ -639,7 +655,7 @@ enum ScoreLibrary {
         cha2ds2(),
         hasBled(),
         childPugh(),
-        timi()
+        timi(), saps3(), news2(), mews(), kdigo(), oxygenation(), spesi(), rass(), braden(), sepsis()
     ]
 
     static let references: [ClinicalReference] = [
@@ -652,7 +668,7 @@ enum ScoreLibrary {
         cha2ds2Reference,
         hasBledReference,
         childPughReference,
-        timiReference
+        timiReference, saps3Reference, news2Reference, mewsReference, kdigoReference, oxygenationReference, pesiReference, rassReference, bradenReference, sepsisReference
     ]
 
     private static let sofaReference = ref(
@@ -714,6 +730,16 @@ enum ScoreLibrary {
         "Antman EM et al. The TIMI risk score for unstable angina/non-ST elevation MI. JAMA. 2000.",
         "https://pubmed.ncbi.nlm.nih.gov/10938172/"
     )
+
+    private static let news2Reference = ref("NEWS2", "Royal College of Physicians. National Early Warning Score (NEWS2). 2017.", "https://www.rcplondon.ac.uk/projects/outputs/national-early-warning-score-news-2")
+    private static let saps3Reference = ref("SAPS 3", "Moreno RP et al. SAPS 3. Intensive Care Med. 2005.", "https://pubmed.ncbi.nlm.nih.gov/16132892/")
+    private static let mewsReference = ref("MEWS", "Subbe CP et al. Validation of a modified Early Warning Score. QJM. 2001.", "https://pubmed.ncbi.nlm.nih.gov/11588210/")
+    private static let kdigoReference = ref("KDIGO", "KDIGO Clinical Practice Guideline for Acute Kidney Injury. 2012.", "https://kdigo.org/guidelines/acute-kidney-injury/")
+    private static let oxygenationReference = ref("Oxigenacao", "ARDS Definition Task Force. Berlin Definition of ARDS. JAMA. 2012.", "https://pubmed.ncbi.nlm.nih.gov/22797452/")
+    private static let pesiReference = ref("PESI/sPESI", "Aujesky D et al. Derivation and validation of PESI. 2005.", "https://pubmed.ncbi.nlm.nih.gov/15665310/")
+    private static let rassReference = ref("RASS", "Sessler CN et al. Richmond Agitation-Sedation Scale. 2002.", "https://pubmed.ncbi.nlm.nih.gov/12421743/")
+    private static let bradenReference = ref("Braden", "Bergstrom N et al. The Braden Scale. Nurs Res. 1987.", "https://pubmed.ncbi.nlm.nih.gov/3299278/")
+    private static let sepsisReference = ref("Sepsis-3", "Singer M et al. Sepsis-3 definitions. JAMA. 2016.", "https://pubmed.ncbi.nlm.nih.gov/26903338/")
 
     private static func sofa() -> ScoreDefinition {
         let fields = [
@@ -866,6 +892,51 @@ enum ScoreLibrary {
             let cls = score <= 2 ? "Baixo risco" : score <= 4 ? "Risco intermediario" : "Alto risco"
             return result("TIMI", score, cls, "Risco aproximado de evento em 14 dias: \(timiRisk(Int(score))).", unit: "")
         }
+    }
+
+    private static func news2() -> ScoreDefinition {
+        let f = [field("rr","Frequencia respiratoria (irpm)",[("12 a 20",0),("9 a 11",1),("21 a 24",2),("<= 8",3),(">= 25",3)]), field("spo2","SpO2 - escala 1",[(">= 96%",0),("94 a 95%",1),("92 a 93%",2),("<= 91%",3)]), field("oxygen","Oxigenio suplementar",[("Nao",0),("Sim",2)]), field("sbp","Pressao sistolica (mmHg)",[("111 a 219",0),("101 a 110",1),("91 a 100",2),("<= 90",3),(">= 220",3)]), field("pulse","Pulso (bpm)",[("51 a 90",0),("41 a 50",1),("91 a 110",1),("111 a 130",2),("<= 40",3),(">= 131",3)]), field("mental","Consciencia",[("Alerta",0),("Confusao nova, voz, dor ou irresponsivo",3)]), field("temp","Temperatura (C)",[("36,1 a 38,0",0),("35,1 a 36,0",1),("38,1 a 39,0",1),(">= 39,1",2),("<= 35,0",3)])]
+        return ScoreDefinition(id:"news2",shortName:"NEWS2",title:"NEWS2",helper:"Deteccao de deterioracao clinica em adultos.",reference:news2Reference,fields:f){s in let n=sum(f,s);let c=n>=7 ? "Risco alto" : n>=5 ? "Risco medio" : n>=1 ? "Risco baixo" : "Sem alerta atual";return result("NEWS2",n,c,n>=7 ? "Resposta emergencial e avaliacao imediata." : n>=5 ? "Revisao urgente e monitorizacao mais frequente." : "Seguir protocolo local; um parametro com 3 pontos tambem exige escalonamento.",unit:"")}
+    }
+
+    private static func saps3() -> ScoreDefinition {
+        let f=[field("age","Idade",[("< 40",0),("40 a 59",5),("60 a 69",9),("70 a 79",13),(">= 80",18)]),field("los","Tempo hospitalar antes da UTI",[("< 14 dias",0),("14 a 27 dias",4),(">= 28 dias",7)]),field("origin","Origem",[("Centro cirurgico/recuperacao",0),("Emergencia/outra unidade",5),("Outra UTI",8)]),field("admission","Tipo de admissao",[("Cirurgia eletiva",0),("Clinica",5),("Cirurgia de urgencia",8)]),field("gcs","Glasgow",[("13 a 15",0),("10 a 12",5),("6 a 9",10),("3 a 5",15)]),field("bili","Bilirrubina",[("< 2",0),("2 a 5,9",4),(">= 6",5)]),field("temp","Temperatura",[(">= 35",0),("33 a 34,9",3),("< 33",7)]),field("creat","Creatinina",[("< 1,2",0),("1,2 a 3,4",2),(">= 3,5",7)]),field("hr","Frequencia cardiaca",[("50 a 119",0),("120 a 159",5),("<50 ou >=160",7)]),field("wbc","Leucocitos",[("3 a 14,9 mil",0),("15 a 49,9 mil",2),("<3 ou >=50 mil",7)]),field("ph","pH",[(">= 7,35",0),("7,25 a 7,34",3),("< 7,25",8)]),field("platelets","Plaquetas",[(">= 100 mil",0),("50 a 99 mil",3),("< 50 mil",8)]),field("sbp","Pressao sistolica",[(">= 120",0),("70 a 119",5),("< 70",10)]),field("oxygen","Oxigenacao",[("P/F >= 300",0),("P/F 100 a 299",6),("P/F < 100",11)]),field("comorb","Comorbidade grave",[("Nao",0),("Sim",6)]),field("vaso","Droga vasoativa antes da admissao",[("Nao",0),("Sim",5)]),field("infection","Infeccao aguda na admissao",[("Nao",0),("Sim",5)])]
+        return ScoreDefinition(id:"saps3",shortName:"SAPS 3",title:"SAPS 3",helper:"Modelo de gravidade na admissao; valide no protocolo institucional.",reference:saps3Reference,fields:f){s in let n=sum(f,s)+16;let c=n<45 ? "Menor gravidade" : n<60 ? "Gravidade intermediaria" : n<75 ? "Alta gravidade" : "Gravidade muito alta";return result("SAPS 3",n,c,"A mortalidade depende da equacao regional calibrada.")}
+    }
+
+    private static func mews() -> ScoreDefinition {
+        let f=[field("sbp","Pressao sistolica",[("101 a 199",0),("81 a 100",1),("71 a 80",2),("<= 70",3),(">= 200",3)]),field("hr","Frequencia cardiaca",[("51 a 100",0),("41 a 50",1),("101 a 110",2),("111 a 129",2),("<= 40",3),(">= 130",3)]),field("rr","Frequencia respiratoria",[("9 a 14",0),("15 a 20",1),("21 a 29",2),("<= 8",3),(">= 30",3)]),field("temp","Temperatura",[("35,0 a 38,4",0),("38,5 a 38,9",1),("< 35,0",2),(">= 39,0",2)]),field("mental","Consciencia",[("Alerta",0),("Voz",1),("Dor",2),("Irresponsivo",3)])]
+        return ScoreDefinition(id:"mews",shortName:"MEWS",title:"Modified Early Warning Score",helper:"Rastreio de deterioracao conforme protocolo local.",reference:mewsReference,fields:f){s in let n=sum(f,s);let c=n>=5 ? "Alto risco" : n>=3 ? "Risco aumentado" : "Baixo risco";return result("MEWS",n,c,n>=5 ? "Avaliacao imediata e considerar cuidados intensivos." : "Reavaliar pela tendencia.",unit:"")}
+    }
+
+    private static func kdigo() -> ScoreDefinition {
+        let f=[field("creat","Creatinina",[("Sem criterio",0),("1,5-1,9x basal ou +0,3 mg/dL",1),("2,0-2,9x basal",2),("3x basal, >=4 mg/dL ou TRS",3)]),field("urine","Diurese",[(">=0,5 mL/kg/h",0),("<0,5 por 6-12 h",1),("<0,5 por >=12 h",2),("<0,3 por >=24 h ou anuria >=12 h",3)])]
+        return ScoreDefinition(id:"kdigo",shortName:"KDIGO",title:"KDIGO - Lesao renal aguda",helper:"Classifica pelo criterio mais grave.",reference:kdigoReference,fields:f){s in let n=max(selected("creat",f,s),selected("urine",f,s));let c=n==0 ? "Sem criterio de LRA" : "LRA estagio \(Int(n))";return result("KDIGO",n,c,n>=2 ? "Lesao renal moderada/grave; avaliar causa e suporte." : "Monitorar creatinina e diurese.",unit:"")}
+    }
+
+    private static func oxygenation() -> ScoreDefinition {
+        let f=[field("pf","Relacao PaO2/FiO2",[("> 300",0),("201 a 300",1),("101 a 200",2),("<= 100",3)]),field("oi","Indice de oxigenacao",[("< 5",0),("5 a <15",1),("15 a <25",2),(">= 25",3)])]
+        return ScoreDefinition(id:"oxygenation",shortName:"P/F e IO",title:"Oxigenacao: P/F e indice de oxigenacao",helper:"P/F = PaO2/FiO2; IO = FiO2 x pressao media x 100 / PaO2.",reference:oxygenationReference,fields:f){s in let n=max(selected("pf",f,s),selected("oi",f,s));let c=n==0 ? "Oxigenacao preservada" : n==1 ? "Comprometimento leve" : n==2 ? "Comprometimento moderado" : "Comprometimento grave";return result("Oxigenacao",n,c,"Interpretar com suporte ventilatorio e contexto clinico.",unit:"")}
+    }
+
+    private static func spesi() -> ScoreDefinition {
+        let f=yesNoFields([("age","Idade > 80 anos"),("cancer","Cancer"),("cardio","Insuficiencia cardiaca ou doenca pulmonar cronica"),("pulse","Pulso >= 110"),("sbp","PAS < 100"),("spo2","SpO2 < 90%")])
+        return ScoreDefinition(id:"pesi",shortName:"PESI/sPESI",title:"PESI simplificado (sPESI)",helper:"Esta tela calcula o sPESI validado.",reference:pesiReference,fields:f){s in let n=sum(f,s);let c=n==0 ? "Baixo risco" : "Risco aumentado";return result("sPESI",n,c,n==0 ? "Confirmar elegibilidade pela avaliacao completa." : "Maior risco de mortalidade em 30 dias.",unit:"")}
+    }
+
+    private static func rass() -> ScoreDefinition {
+        let f=[field("state","Estado",[("+4 Combativo",4),("+3 Muito agitado",3),("+2 Agitado",2),("+1 Inquieto",1),("0 Alerta e calmo",0),("-1 Sonolento",-1),("-2 Sedacao leve",-2),("-3 Sedacao moderada",-3),("-4 Sedacao profunda",-4),("-5 Nao despertavel",-5)])]
+        return ScoreDefinition(id:"rass",shortName:"RASS",title:"Richmond Agitation-Sedation Scale",helper:"Selecione o estado observado.",reference:rassReference,fields:f){s in let n=selected("state",f,s);let c=n>0 ? "Agitacao" : n==0 ? "Alerta e calmo" : "Sedacao";return result("RASS",n,c,"Registrar tendencia e confrontar com a meta individual.",unit:"")}
+    }
+
+    private static func braden() -> ScoreDefinition {
+        let four=[("Totalmente limitada",1.0),("Muito limitada",2.0),("Levemente limitada",3.0),("Nenhuma limitacao",4.0)];let f=[field("sensory","Percepcao sensorial",four),field("moisture","Umidade",[("Constantemente umida",1),("Muito umida",2),("Ocasionalmente umida",3),("Raramente umida",4)]),field("activity","Atividade",[("Acamado",1),("Cadeira",2),("Caminha ocasionalmente",3),("Caminha frequentemente",4)]),field("mobility","Mobilidade",four),field("nutrition","Nutricao",[("Muito pobre",1),("Provavelmente inadequada",2),("Adequada",3),("Excelente",4)]),field("friction","Friccao e cisalhamento",[("Problema",1),("Problema potencial",2),("Sem problema aparente",3)])]
+        return ScoreDefinition(id:"braden",shortName:"Braden",title:"Escala de Braden",helper:"Quanto menor a pontuacao, maior o risco.",reference:bradenReference,fields:f){s in let n=sum(f,s);let c=n<=9 ? "Risco muito alto" : n<=12 ? "Risco alto" : n<=14 ? "Risco moderado" : n<=18 ? "Em risco" : "Sem risco pelo corte usual";return result("Braden",n,c,"Implementar prevencao conforme protocolo.")}
+    }
+
+    private static func sepsis() -> ScoreDefinition {
+        let f=yesNoFields([("infection","Infeccao suspeita/documentada"),("sofa","Aumento agudo SOFA >= 2"),("vaso","Vasopressor para PAM >=65 apesar de ressuscitacao"),("lactate","Lactato >2 apesar de ressuscitacao")])
+        return ScoreDefinition(id:"sepsis",shortName:"Sepse/choque",title:"Sepse e choque septico (Sepsis-3)",helper:"Requer avaliacao clinica e laboratorial.",reference:sepsisReference,fields:f){s in let i=selected("infection",f,s)>0,so=selected("sofa",f,s)>0,v=selected("vaso",f,s)>0,l=selected("lactate",f,s)>0;let c=i&&so ? (v&&l ? "Choque septico" : "Sepse") : "Criterios nao completos";return result("Sepsis-3",v&&l ? 2 : i&&so ? 1 : 0,c,c=="Choque septico" ? "Emergencia: tratamento e suporte imediatos." : c=="Sepse" ? "Iniciar manejo e monitorizacao imediatos." : "Nao exclui infeccao grave.",unit:"")}
     }
 
     private static func field(_ id: String, _ label: String, _ raw: [(String, Double)], ignore: Bool = false) -> ScoreField {
