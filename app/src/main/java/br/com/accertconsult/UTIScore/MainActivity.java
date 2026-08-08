@@ -151,7 +151,7 @@ public class MainActivity extends Activity {
         calcCard.addView(calculate, calcParams);
 
         Button clear = secondaryButton("Novo paciente / Limpar tudo");
-        clear.setOnClickListener(v -> clearPatient());
+        clear.setOnClickListener(v -> confirmClearPatient());
         LinearLayout.LayoutParams clearParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, dp(42));
         clearParams.setMargins(0, dp(8), 0, 0);
@@ -571,6 +571,15 @@ public class MainActivity extends Activity {
         selectSpec(scoreToKeep);
         updateNote();
         Toast.makeText(this, "Novo paciente iniciado", Toast.LENGTH_SHORT).show();
+    }
+
+    private void confirmClearPatient() {
+        new AlertDialog.Builder(this)
+                .setTitle("Iniciar novo paciente?")
+                .setMessage("Todos os dados preenchidos e resultados calculados serão apagados.")
+                .setNegativeButton("Cancelar", null)
+                .setPositiveButton("Limpar tudo", (dialog, which) -> clearPatient())
+                .show();
     }
 
     private void showResult(ScoreResult result) {

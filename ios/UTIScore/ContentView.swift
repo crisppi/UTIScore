@@ -59,6 +59,7 @@ struct ContentView: View {
     @State private var referencesVisible = false
     @State private var copiedVisible = false
     @State private var noteVisible = false
+    @State private var clearConfirmationVisible = false
 
     private let accent = Color(red: 37 / 255, green: 99 / 255, blue: 235 / 255)
     private let accentDark = Color(red: 30 / 255, green: 64 / 255, blue: 175 / 255)
@@ -105,6 +106,18 @@ struct ContentView: View {
         }
         .alert("Avaliacao copiada", isPresented: $copiedVisible) {
             Button("OK", role: .cancel) {}
+        }
+        .confirmationDialog(
+            "Iniciar novo paciente?",
+            isPresented: $clearConfirmationVisible,
+            titleVisibility: .visible
+        ) {
+            Button("Limpar tudo", role: .destructive) {
+                clearPatient()
+            }
+            Button("Cancelar", role: .cancel) {}
+        } message: {
+            Text("Todos os dados preenchidos e resultados calculados serao apagados.")
         }
     }
 
@@ -307,12 +320,7 @@ struct ContentView: View {
             .clipShape(RoundedRectangle(cornerRadius: 8))
 
             Button("Novo paciente / Limpar tudo") {
-                selections = [:]
-                selectionsByScore = [:]
-                savedResults = [:]
-                beneficiaryContext = ""
-                criteria = []
-                noteVisible = false
+                clearConfirmationVisible = true
             }
             .font(.system(size: 14, weight: .semibold))
             .foregroundStyle(accentDark)
@@ -535,6 +543,15 @@ struct ContentView: View {
     private func calculate() {
         selectionsByScore[selectedScore.id] = selections
         savedResults[selectedScore.id] = selectedScore.evaluate(selections)
+    }
+
+    private func clearPatient() {
+        selections = [:]
+        selectionsByScore = [:]
+        savedResults = [:]
+        beneficiaryContext = ""
+        criteria = []
+        noteVisible = false
     }
 
     private func openEmail(subject: String) {
